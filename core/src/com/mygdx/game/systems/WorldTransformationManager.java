@@ -2,27 +2,37 @@ package com.mygdx.game.systems;
 
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
+import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
+import com.artemis.link.LinkListener;
+import com.artemis.utils.IntBag;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.IntMap;
+import com.mygdx.game.components.Children;
 import com.mygdx.game.components.Parented;
 import com.mygdx.game.components.Transform;
+
+import java.util.IdentityHashMap;
 
 /**
  * Created by Casper on 19-07-2016.
  */
-public class WorldTransformationManager extends BaseEntitySystem {
-
-    private static final Vector3 forwardAxis = new Vector3(0, 0, 1);
+public class WorldTransformationManager extends BaseSystem implements LinkListener {
 
     private ComponentMapper<Parented> mParented;
+    private ComponentMapper<Children> mChildren;
     private ComponentMapper<Transform> mTransform;
 
-//    private Map<Transform, Matrix4> worldMatrixMap = new IdentityHashMap<Transform, Matrix4>();
+    private final IntMap<Matrix3> localToParentCache = new IntMap<Matrix3>();
+    private final IntMap<Matrix3> localToWorldCache = new IntMap<Matrix3>();
+    private final IntMap<Matrix3> worldToLocalCache = new IntMap<Matrix3>();
 
     public WorldTransformationManager() {
-        super(Aspect.all(Parented.class, Transform.class));
+
     }
 
     @Override
@@ -35,6 +45,13 @@ public class WorldTransformationManager extends BaseEntitySystem {
         return parented != null
                 ? parented.Parent
                 : -1;
+    }
+
+    public IntBag getChildren(int entityId) {
+        Children children = mChildren.get(entityId);
+        return children != null
+                ? children.Targets
+                : null;
     }
 
     //region Local Properties
@@ -52,6 +69,9 @@ public class WorldTransformationManager extends BaseEntitySystem {
 
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
+
+        if (transform.Position.epsilonEquals(x, y, MathUtils.FLOAT_ROUNDING_ERROR))
+            return;
 
         transform.Position.set(x, y);
         markDirty(entityId);
@@ -72,6 +92,9 @@ public class WorldTransformationManager extends BaseEntitySystem {
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
+        if (MathUtils.isEqual(transform.Rotation, degrees))
+            return;
+
         transform.Rotation = degrees;
         markDirty(entityId);
     }
@@ -90,6 +113,9 @@ public class WorldTransformationManager extends BaseEntitySystem {
 
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
+
+        if (transform.Scale.epsilonEquals(x, y, MathUtils.FLOAT_ROUNDING_ERROR))
+            return;
 
         transform.Scale.set(x, y);
         markDirty(entityId);
@@ -158,9 +184,24 @@ public class WorldTransformationManager extends BaseEntitySystem {
     }
     //endregion
 
+    // todo: might not be needed anymore due to LinkListener
+//    public void setParent(int entityId, int parent)
+//    {
+//        Parented parented = mParented.create(entityId);
+//        parented.Parent = parent;
+//        markDirty(entityId);
+//    }
+//
+//    public void removeParent(int entityId)
+//    {
+//        mParented.remove(entityId);
+//        markDirty(entityId);
+//    }
+
     //region Matrices
     public Matrix3 getLocalToParentMatrix(int entityId) {
-        // todo: cache result and make sure to create a copy from cache so cache isn't modified.
+        if (localToParentCache.containsKey(entityId))
+            return localToParentCache.get(entityId);
 
         Transform transform = mTransform.get(entityId);
 
@@ -171,24 +212,36 @@ public class WorldTransformationManager extends BaseEntitySystem {
         matrix.translate(transform.Position.x, transform.Position.y);
         matrix.scale(transform.Scale.x, transform.Scale.y);
         matrix.rotate(transform.Rotation);
+
+        localToParentCache.put(entityId, matrix);
+
         return matrix;
     }
 
     public Matrix3 getLocalToWorldMatrix(int entityId) {
-        // todo: cache result
+        if (localToWorldCache.containsKey(entityId))
+            return localToWorldCache.get(entityId);
 
         Matrix3 localToParentMatrix = getLocalToParentMatrix(entityId);
         int parent = getParent(entityId);
 
-        if (parent != -1)
-            return getLocalToWorldMatrix(parent).mul(localToParentMatrix);
+        Matrix3 result = localToParentMatrix;
 
-        return localToParentMatrix;
+        if (parent != -1)
+            result = new Matrix3(getLocalToWorldMatrix(parent)).mul(localToParentMatrix);
+
+        localToWorldCache.put(entityId, result);
+
+        return result;
     }
 
     public Matrix3 getWorldToLocalMatrix(int entityId) {
-        // todo: cache result
-        return getLocalToWorldMatrix(entityId).inv();
+        if (worldToLocalCache.containsKey(entityId))
+            return worldToLocalCache.get(entityId);
+
+        Matrix3 result = new Matrix3(getLocalToWorldMatrix(entityId)).inv();
+        worldToLocalCache.put(entityId, result);
+        return result;
     }
     //endregion
 
@@ -252,9 +305,64 @@ public class WorldTransformationManager extends BaseEntitySystem {
     public Vector2 inverseTransformVector(int entityId, Vector2 worldVector) {
         return inverseTransformVector(entityId, worldVector.x, worldVector.y);
     }
-    //endregionsss
+    //endregion
 
     private void markDirty(int entityId) {
-        // just remove cached value
+        IntBag children = getChildren(entityId);
+        if (children != null) {
+            for (int i = 0; i < children.size(); i++) {
+                markDirty(children.get(i));
+            }
+        }
+
+        localToParentCache.remove(entityId);
+        localToWorldCache.remove(entityId);
+        worldToLocalCache.remove(entityId);
+    }
+
+    @Override
+    public void onLinkEstablished(int sourceId, int targetId) {
+        Gdx.app.log("WTM", "link established");
+
+        Children children = mChildren.create(targetId);
+        children.Targets.add(sourceId);
+
+        markDirty(sourceId);
+    }
+
+    @Override
+    public void onLinkKilled(int sourceId, int targetId) {
+        Gdx.app.log("WTM", "link killed");
+
+        removeFromChildren(sourceId, targetId);
+    }
+
+    @Override
+    public void onTargetDead(int sourceId, int deadTargetId) {
+        Gdx.app.log("WTM", "link target dead");
+
+        mParented.remove(sourceId);
+        markDirty(sourceId);
+    }
+
+    @Override
+    public void onTargetChanged(int sourceId, int targetId, int oldTargetId) {
+        Gdx.app.log("WTM", "link target changed");
+
+        Children children = mChildren.create(targetId);
+        children.Targets.add(sourceId);
+        removeFromChildren(sourceId, oldTargetId);
+    }
+
+    private void removeFromChildren(int childId, int parentId) {
+        Children children = mChildren.get(parentId);
+        if (children != null)
+        {
+            children.Targets.removeValue(childId);
+            if (children.Targets.size() == 0)
+                mChildren.remove(parentId);
+        }
+
+        markDirty(childId);
     }
 }

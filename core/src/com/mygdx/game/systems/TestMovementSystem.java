@@ -5,6 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.components.TestMovement;
 import com.mygdx.game.components.Transform;
 
@@ -13,8 +14,8 @@ import com.mygdx.game.components.Transform;
  */
 public class TestMovementSystem extends IteratingSystem {
 
-    private ComponentMapper<Transform> mTransform;
     private ComponentMapper<TestMovement> mTestMovement;
+    private WorldTransformationManager transformManager;
 
     public TestMovementSystem() {
         super(Aspect.all(TestMovement.class, Transform.class));
@@ -22,7 +23,6 @@ public class TestMovementSystem extends IteratingSystem {
 
     @Override
     protected void process(int i) {
-        Transform trans = mTransform.get(i);
         TestMovement mov = mTestMovement.get(i);
 
         float axisX = Gdx.input.isKeyPressed(Input.Keys.LEFT) ? -1 : 0;
@@ -31,6 +31,9 @@ public class TestMovementSystem extends IteratingSystem {
         float axisY = Gdx.input.isKeyPressed(Input.Keys.DOWN) ? -1 : 0;
         axisY += Gdx.input.isKeyPressed(Input.Keys.UP) ? 1 : 0;
 
-        trans.Position.add(axisX * mov.Speed * world.getDelta(), axisY * mov.Speed * world.getDelta());
+        Vector2 currentPos = transformManager.getLocalPosition(i);
+        transformManager.setLocalPosition(i,
+                currentPos.x + axisX * mov.Speed * world.getDelta(),
+                currentPos.y + axisY * mov.Speed * world.getDelta());
     }
 }

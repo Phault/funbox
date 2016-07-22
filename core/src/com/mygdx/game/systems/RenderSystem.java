@@ -28,8 +28,6 @@ public class RenderSystem extends IteratingSystem
     @Override
     protected void initialize() {
         super.initialize();
-
-        transformManager = world.getSystem(WorldTransformationManager.class);
     }
 
     @Override
@@ -40,7 +38,6 @@ public class RenderSystem extends IteratingSystem
     @Override
     protected void process(int entityId) {
         Sprite sprite = mSprite.get(entityId);
-//        Transform transform = mTransform.get(entityId);
 
         Vector2 pos = transformManager.getWorldPosition(entityId);
         Vector2 scale = transformManager.getWorldScale(entityId);

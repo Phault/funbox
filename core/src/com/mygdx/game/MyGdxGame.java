@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
 import com.artemis.*;
+import com.artemis.injection.ArtemisFieldResolver;
+import com.artemis.link.EntityLinkManager;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -22,13 +24,18 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
         img = new Texture("badlogic.jpg");
 
+        WorldTransformationManager transformManager = new WorldTransformationManager();
+
         WorldConfiguration config = new WorldConfigurationBuilder()
-                .with(new WorldTransformationManager())
+                .with(new EntityLinkManager())
+                .with(transformManager)
                 .with(new RenderSystem())
                 .with(new TestMovementSystem())
                 .build();
 
         world = new World(config);
+
+        world.getSystem(EntityLinkManager.class).register(Parented.class, transformManager);
 
         int parent = world.create();
         world.edit(parent).create(TestMovement.class);

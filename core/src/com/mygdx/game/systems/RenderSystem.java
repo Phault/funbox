@@ -42,9 +42,9 @@ public class RenderSystem extends IteratingSystem
         Sprite sprite = mSprite.get(entityId);
 //        Transform transform = mTransform.get(entityId);
 
-        Vector2 pos = transformManager.getPosition(entityId);
-        Vector2 scale = transformManager.getScale(entityId);
-        float rotation = transformManager.getRotation(entityId);
+        Vector2 pos = transformManager.getWorldPosition(entityId);
+        Vector2 scale = transformManager.getWorldScale(entityId);
+        float rotation = transformManager.getWorldRotation(entityId);
 
         spriteBatch.draw(sprite.Texture,
                 pos.x,

@@ -7,10 +7,10 @@ import com.artemis.annotations.EntityId;
  * Created by Casper on 19-07-2016.
  */
 public class Parented extends PooledComponent {
-    @EntityId public int Parent = -1;
+    @EntityId public int target = -1;
 
     @Override
     protected void reset() {
-        Parent = -1;
+        target = -1;
     }
 }

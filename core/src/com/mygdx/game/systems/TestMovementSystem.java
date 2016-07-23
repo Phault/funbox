@@ -33,7 +33,7 @@ public class TestMovementSystem extends IteratingSystem {
 
         Vector2 currentPos = transformManager.getLocalPosition(i);
         transformManager.setLocalPosition(i,
-                currentPos.x + axisX * mov.Speed * world.getDelta(),
-                currentPos.y + axisY * mov.Speed * world.getDelta());
+                currentPos.x + axisX * mov.speed * world.getDelta(),
+                currentPos.y + axisY * mov.speed * world.getDelta());
     }
 }

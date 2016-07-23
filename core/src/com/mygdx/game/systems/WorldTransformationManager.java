@@ -1,7 +1,5 @@
 package com.mygdx.game.systems;
 
-import com.artemis.Aspect;
-import com.artemis.BaseEntitySystem;
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
 import com.artemis.link.LinkListener;
@@ -10,13 +8,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.IntMap;
 import com.mygdx.game.components.Children;
 import com.mygdx.game.components.Parented;
 import com.mygdx.game.components.Transform;
-
-import java.util.IdentityHashMap;
 
 /**
  * Created by Casper on 19-07-2016.
@@ -43,14 +38,14 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     public int getParent(int entityId) {
         Parented parented = mParented.get(entityId);
         return parented != null
-                ? parented.Parent
+                ? parented.target
                 : -1;
     }
 
     public IntBag getChildren(int entityId) {
         Children children = mChildren.get(entityId);
         return children != null
-                ? children.Targets
+                ? children.targets
                 : null;
     }
 
@@ -61,7 +56,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        return transform.Position;
+        return transform.position;
     }
 
     public void setLocalPosition(int entityId, float x, float y) throws IllegalArgumentException {
@@ -70,10 +65,10 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        if (transform.Position.epsilonEquals(x, y, MathUtils.FLOAT_ROUNDING_ERROR))
+        if (transform.position.epsilonEquals(x, y, MathUtils.FLOAT_ROUNDING_ERROR))
             return;
 
-        transform.Position.set(x, y);
+        transform.position.set(x, y);
         markDirty(entityId);
     }
 
@@ -83,7 +78,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        return transform.Rotation;
+        return transform.rotation;
     }
 
     public void setLocalRotation(int entityId, float degrees) throws IllegalArgumentException {
@@ -92,10 +87,10 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        if (MathUtils.isEqual(transform.Rotation, degrees))
+        if (MathUtils.isEqual(transform.rotation, degrees))
             return;
 
-        transform.Rotation = degrees;
+        transform.rotation = degrees;
         markDirty(entityId);
     }
 
@@ -105,7 +100,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        return transform.Scale;
+        return transform.scale;
     }
 
     public void setLocalScale(int entityId, float x, float y) {
@@ -114,10 +109,10 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        if (transform.Scale.epsilonEquals(x, y, MathUtils.FLOAT_ROUNDING_ERROR))
+        if (transform.scale.epsilonEquals(x, y, MathUtils.FLOAT_ROUNDING_ERROR))
             return;
 
-        transform.Scale.set(x, y);
+        transform.scale.set(x, y);
         markDirty(entityId);
     }
     //endregion
@@ -188,7 +183,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
 //    public void setParent(int entityId, int parent)
 //    {
 //        Parented parented = mParented.create(entityId);
-//        parented.Parent = parent;
+//        parented.target = parent;
 //        markDirty(entityId);
 //    }
 //
@@ -209,9 +204,9 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
             throw new IllegalArgumentException("Entity has no Transform component");
 
         Matrix3 matrix = new Matrix3();
-        matrix.translate(transform.Position.x, transform.Position.y);
-        matrix.scale(transform.Scale.x, transform.Scale.y);
-        matrix.rotate(transform.Rotation);
+        matrix.translate(transform.position.x, transform.position.y);
+        matrix.scale(transform.scale.x, transform.scale.y);
+        matrix.rotate(transform.rotation);
 
         localToParentCache.put(entityId, matrix);
 
@@ -325,7 +320,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         Gdx.app.log("WTM", "link established");
 
         Children children = mChildren.create(targetId);
-        children.Targets.add(sourceId);
+        children.targets.add(sourceId);
 
         markDirty(sourceId);
     }
@@ -350,7 +345,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         Gdx.app.log("WTM", "link target changed");
 
         Children children = mChildren.create(targetId);
-        children.Targets.add(sourceId);
+        children.targets.add(sourceId);
         removeFromChildren(sourceId, oldTargetId);
     }
 
@@ -358,8 +353,8 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         Children children = mChildren.get(parentId);
         if (children != null)
         {
-            children.Targets.removeValue(childId);
-            if (children.Targets.size() == 0)
+            children.targets.removeValue(childId);
+            if (children.targets.size() == 0)
                 mChildren.remove(parentId);
         }
 

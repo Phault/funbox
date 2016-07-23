@@ -43,13 +43,13 @@ public class RenderSystem extends IteratingSystem
         Vector2 scale = transformManager.getWorldScale(entityId);
         float rotation = transformManager.getWorldRotation(entityId);
 
-        spriteBatch.draw(sprite.Texture,
+        spriteBatch.draw(sprite.texture,
                 pos.x,
                 pos.y,
                 0,
                 0,
-                sprite.Texture.getRegionWidth(),
-                sprite.Texture.getRegionHeight(),
+                sprite.texture.getRegionWidth(),
+                sprite.texture.getRegionHeight(),
                 scale.x,
                 scale.y,
                 rotation);

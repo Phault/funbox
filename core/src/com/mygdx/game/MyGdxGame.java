@@ -1,7 +1,6 @@
 package com.mygdx.game;
 
 import com.artemis.*;
-import com.artemis.injection.ArtemisFieldResolver;
 import com.artemis.link.EntityLinkManager;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -39,18 +38,18 @@ public class MyGdxGame extends ApplicationAdapter {
 
         int parent = world.create();
         world.edit(parent).create(TestMovement.class);
-        world.edit(parent).create(Sprite.class).Texture = new TextureRegion(img);
+        world.edit(parent).create(Sprite.class).texture = new TextureRegion(img);
         Transform parentTransform = world.edit(parent).create(Transform.class);
-        parentTransform.Position.set(200, 0);
-        parentTransform.Rotation = 45;
-        parentTransform.Scale.set(0.5f, 1);
+        parentTransform.position.set(200, 0);
+        parentTransform.rotation = 45;
+        parentTransform.scale.set(0.5f, 1);
 
         int child = world.create();
-        world.edit(child).create(Sprite.class).Texture = new TextureRegion(img);
+        world.edit(child).create(Sprite.class).texture = new TextureRegion(img);
         Transform childTransform = world.edit(child).create(Transform.class);
-        childTransform.Position.set(50, 50);
-        childTransform.Rotation = -45;
-        world.edit(child).create(Parented.class).Parent = parent;
+        childTransform.position.set(50, 50);
+        childTransform.rotation = -45;
+        world.edit(child).create(Parented.class).target = parent;
     }
 
     @Override

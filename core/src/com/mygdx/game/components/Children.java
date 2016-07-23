@@ -10,10 +10,10 @@ import com.artemis.utils.IntBag;
  */
 public class Children extends PooledComponent {
     @EntityId @LinkPolicy(LinkPolicy.Policy.CHECK_SOURCE)
-    public IntBag Targets = new IntBag();
+    public IntBag targets = new IntBag(1);
 
     @Override
     protected void reset() {
-        Targets.setSize(0);
+        targets.setSize(0);
     }
 }

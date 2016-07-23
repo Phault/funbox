@@ -9,10 +9,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 @Transient
 public class Sprite extends PooledComponent {
-    public TextureRegion Texture = null;
+    public TextureRegion texture = null;
 
     @Override
     protected void reset() {
-        Texture = null;
+        texture = null;
     }
 }

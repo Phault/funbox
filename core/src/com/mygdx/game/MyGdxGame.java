@@ -23,18 +23,14 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
         img = new Texture("badlogic.jpg");
 
-        WorldTransformationManager transformManager = new WorldTransformationManager();
-
         WorldConfiguration config = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
-                .with(transformManager)
+                .with(new WorldTransformationManager())
                 .with(new RenderSystem())
                 .with(new TestMovementSystem())
                 .build();
 
         world = new World(config);
-
-        world.getSystem(EntityLinkManager.class).register(Parented.class, transformManager);
 
         int parent = world.create();
         world.edit(parent).create(TestMovement.class);

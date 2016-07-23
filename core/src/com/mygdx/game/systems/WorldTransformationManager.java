@@ -2,6 +2,7 @@ package com.mygdx.game.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
+import com.artemis.link.EntityLinkManager;
 import com.artemis.link.LinkListener;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
@@ -28,6 +29,22 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
 
     public WorldTransformationManager() {
 
+    }
+
+    @Override
+    protected void initialize() {
+        super.initialize();
+
+        world.getSystem(EntityLinkManager.class).register(Parented.class, this);
+    }
+
+    @Override
+    protected void dispose() {
+        super.dispose();
+
+        localToParentCache.clear();
+        localToWorldCache.clear();
+        worldToLocalCache.clear();
     }
 
     @Override

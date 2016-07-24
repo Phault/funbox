@@ -11,6 +11,7 @@ import com.mygdx.game.components.Parented;
 import com.mygdx.game.components.Sprite;
 import com.mygdx.game.components.TestMovement;
 import com.mygdx.game.components.Transform;
+import com.mygdx.game.systems.CameraSystem;
 import com.mygdx.game.systems.RenderSystem;
 import com.mygdx.game.systems.TestMovementSystem;
 import com.mygdx.game.systems.WorldTransformationManager;
@@ -26,8 +27,9 @@ public class MyGdxGame extends ApplicationAdapter {
         WorldConfiguration config = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
                 .with(new WorldTransformationManager())
-                .with(new RenderSystem())
                 .with(new TestMovementSystem())
+                .with(new CameraSystem())
+                .with(new RenderSystem())
                 .build();
 
         world = new World(config);
@@ -43,14 +45,18 @@ public class MyGdxGame extends ApplicationAdapter {
         int child = world.create();
         world.edit(child).create(Sprite.class).texture = new TextureRegion(img);
         Transform childTransform = world.edit(child).create(Transform.class);
-        childTransform.position.set(50, 50);
+        childTransform.position.set(150, 50);
         childTransform.rotation = -45;
+        childTransform.scale.set(2, 1);
         world.edit(child).create(Parented.class).target = parent;
+
+        world.getSystem(CameraSystem.class).setCameraEntity(child);
     }
 
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
+        world.getSystem(CameraSystem.class).resize(width, height);
     }
 
     @Override

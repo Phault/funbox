@@ -3,6 +3,7 @@ package com.mygdx.game.components;
 import com.artemis.PooledComponent;
 import com.artemis.annotations.Transient;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * Created by Casper on 19-07-2016.
@@ -10,9 +11,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 @Transient
 public class Sprite extends PooledComponent {
     public TextureRegion texture = null;
+    public Vector2 Origin = new Vector2(0.5f, 0.5f);
 
     @Override
     protected void reset() {
         texture = null;
+        Origin.set(0.5f, 0.5f);
     }
 }

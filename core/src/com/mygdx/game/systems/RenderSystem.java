@@ -17,6 +17,8 @@ public class RenderSystem extends IteratingSystem
     private ComponentMapper<Sprite> mSprite;
     private ComponentMapper<Transform> mTransform;
 
+    private CameraSystem cameraSystem;
+
     private SpriteBatch spriteBatch;
 
     public RenderSystem() {
@@ -32,6 +34,8 @@ public class RenderSystem extends IteratingSystem
 
     @Override
     protected void begin() {
+
+        spriteBatch.setProjectionMatrix(cameraSystem.getMatrix());
         spriteBatch.begin();
     }
 
@@ -43,13 +47,19 @@ public class RenderSystem extends IteratingSystem
         Vector2 scale = transformManager.getWorldScale(entityId);
         float rotation = transformManager.getWorldRotation(entityId);
 
+        float width = sprite.texture.getRegionWidth();
+        float height = sprite.texture.getRegionHeight();
+
+        float originX = sprite.Origin.x * width;
+        float originY = sprite.Origin.y * height;
+
         spriteBatch.draw(sprite.texture,
-                pos.x,
-                pos.y,
-                0,
-                0,
-                sprite.texture.getRegionWidth(),
-                sprite.texture.getRegionHeight(),
+                pos.x - originX,
+                pos.y - originY,
+                originX,
+                originY,
+                width,
+                height,
                 scale.x,
                 scale.y,
                 rotation);

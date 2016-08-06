@@ -11,11 +11,11 @@ import com.badlogic.gdx.math.Vector2;
 @Transient
 public class Sprite extends PooledComponent {
     public TextureRegion texture = null;
-    public Vector2 Origin = new Vector2(0.5f, 0.5f);
+    public Vector2 origin = new Vector2(0.5f, 0.5f);
 
     @Override
     protected void reset() {
         texture = null;
-        Origin.set(0.5f, 0.5f);
+        origin.set(0.5f, 0.5f);
     }
 }

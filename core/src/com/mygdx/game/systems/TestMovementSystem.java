@@ -8,6 +8,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.components.TestMovement;
 import com.mygdx.game.components.Transform;
+import com.mygdx.game.components.Velocity;
 
 /**
  * Created by Casper on 20-07-2016.
@@ -15,15 +16,16 @@ import com.mygdx.game.components.Transform;
 public class TestMovementSystem extends IteratingSystem {
 
     private ComponentMapper<TestMovement> mTestMovement;
-    private WorldTransformationManager transformManager;
+    private ComponentMapper<Velocity> mVelocity;
 
     public TestMovementSystem() {
-        super(Aspect.all(TestMovement.class, Transform.class));
+        super(Aspect.all(TestMovement.class, Velocity.class));
     }
 
     @Override
     protected void process(int i) {
         TestMovement mov = mTestMovement.get(i);
+        Velocity vel = mVelocity.get(i);
 
         float axisX = Gdx.input.isKeyPressed(Input.Keys.LEFT) ? -1 : 0;
         axisX += Gdx.input.isKeyPressed(Input.Keys.RIGHT) ? 1 : 0;
@@ -31,9 +33,7 @@ public class TestMovementSystem extends IteratingSystem {
         float axisY = Gdx.input.isKeyPressed(Input.Keys.DOWN) ? -1 : 0;
         axisY += Gdx.input.isKeyPressed(Input.Keys.UP) ? 1 : 0;
 
-        Vector2 currentPos = transformManager.getLocalPosition(i);
-        transformManager.setLocalPosition(i,
-                currentPos.x + axisX * mov.speed * world.getDelta(),
-                currentPos.y + axisY * mov.speed * world.getDelta());
+        vel.x = axisX * mov.speed;
+        vel.y = axisY * mov.speed;
     }
 }

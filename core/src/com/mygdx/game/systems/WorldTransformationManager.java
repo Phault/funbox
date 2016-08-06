@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.components.Children;
 import com.mygdx.game.components.Parented;
 import com.mygdx.game.components.Transform;
@@ -26,6 +27,18 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     private final IntMap<Matrix3> localToParentCache = new IntMap<Matrix3>();
     private final IntMap<Matrix3> localToWorldCache = new IntMap<Matrix3>();
     private final IntMap<Matrix3> worldToLocalCache = new IntMap<Matrix3>();
+
+    private final Pool<Matrix3> matrixPool = new Pool<Matrix3>() {
+        @Override
+        protected Matrix3 newObject() {
+            return new Matrix3();
+        }
+
+        @Override
+        protected void reset(Matrix3 object) {
+            object.idt();
+        }
+    };
 
     public WorldTransformationManager() {
 
@@ -45,6 +58,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         localToParentCache.clear();
         localToWorldCache.clear();
         worldToLocalCache.clear();
+        matrixPool.clear();
     }
 
     @Override
@@ -67,13 +81,13 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     }
 
     //region Local Properties
-    public Vector2 getLocalPosition(int entityId) throws IllegalArgumentException {
+    public Vector2 getLocalPosition(int entityId, Vector2 localPosition) throws IllegalArgumentException {
         Transform transform = mTransform.get(entityId);
 
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        return transform.position;
+        return localPosition.set(transform.position);
     }
 
     public void setLocalPosition(int entityId, float x, float y) throws IllegalArgumentException {
@@ -111,13 +125,13 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         markDirty(entityId);
     }
 
-    public Vector2 getLocalScale(int entityId) throws IllegalArgumentException {
+    public Vector2 getLocalScale(int entityId, Vector2 localScale) throws IllegalArgumentException {
         Transform transform = mTransform.get(entityId);
 
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        return transform.scale;
+        return localScale.set(transform.scale);
     }
 
     public void setLocalScale(int entityId, float x, float y) {
@@ -135,22 +149,24 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     //endregion
 
     //region World Properties
-    public Vector2 getWorldPosition(int entityId) {
-        Vector2 localPos = getLocalPosition(entityId);
+    public Vector2 getWorldPosition(int entityId, Vector2 result) {
+        getLocalPosition(entityId, result);
 
         int parent = getParent(entityId);
         if (parent != -1)
-            return transformPoint(parent, localPos);
+            return transformPoint(parent, result);
 
-        return localPos;
+        return result;
     }
+
+    private static final Vector2 tmpVector = new Vector2();
 
     public void setWorldPosition(int entityId, float x, float y) {
         int parent = getParent(entityId);
         if (parent != -1)
         {
-            Vector2 finalPos = inverseTransformPoint(parent, x, y);
-            setLocalPosition(entityId, finalPos.x, finalPos.y);
+            inverseTransformPoint(parent, x, y, tmpVector);
+            setLocalPosition(entityId, tmpVector.x, tmpVector.y);
         }
         else
             setLocalPosition(entityId, x, y);
@@ -174,22 +190,22 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
             setLocalRotation(entityId, degrees);
     }
 
-    public Vector2 getWorldScale(int entityId) {
-        Vector2 localScale = getLocalScale(entityId);
+    public Vector2 getWorldScale(int entityId, Vector2 result) {
+        getLocalScale(entityId, result);
 
         int parent = getParent(entityId);
         if (parent != -1)
-            return transformVector(parent, localScale);
+            return transformVector(parent, result);
 
-        return localScale;
+        return result;
     }
 
     public void setWorldScale(int entityId, float x, float y) {
         int parent = getParent(entityId);
         if (parent != -1)
         {
-            Vector2 finalScale = inverseTransformVector(parent, x, y);
-            setLocalScale(entityId, finalScale.x, finalScale.y);
+            inverseTransformVector(parent, x, y, tmpVector);
+            setLocalScale(entityId, tmpVector.x, tmpVector.y);
         }
         else
             setLocalScale(entityId, x, y);
@@ -220,7 +236,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (transform == null)
             throw new IllegalArgumentException("Entity has no Transform component");
 
-        Matrix3 matrix = new Matrix3();
+        Matrix3 matrix = matrixPool.obtain();
         matrix.translate(transform.position.x, transform.position.y);
         matrix.scale(transform.scale.x, transform.scale.y);
         matrix.rotate(transform.rotation);
@@ -237,10 +253,10 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         Matrix3 localToParentMatrix = getLocalToParentMatrix(entityId);
         int parent = getParent(entityId);
 
-        Matrix3 result = localToParentMatrix;
+        Matrix3 result = matrixPool.obtain().set(localToParentMatrix);
 
         if (parent != -1)
-            result = new Matrix3(getLocalToWorldMatrix(parent)).mul(localToParentMatrix);
+            result.mulLeft(getLocalToWorldMatrix(parent));
 
         localToWorldCache.put(entityId, result);
 
@@ -251,37 +267,37 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         if (worldToLocalCache.containsKey(entityId))
             return worldToLocalCache.get(entityId);
 
-        Matrix3 result = new Matrix3(getLocalToWorldMatrix(entityId)).inv();
+        Matrix3 result = matrixPool.obtain().set(getLocalToWorldMatrix(entityId)).inv();
         worldToLocalCache.put(entityId, result);
         return result;
     }
     //endregion
 
     //region Matrix transformation helpers
-    public Vector2 transformPoint(int entityId, float x, float y) {
-        return new Vector2(x, y).mul(getLocalToWorldMatrix(entityId));
+    public Vector2 transformPoint(int entityId, float x, float y, Vector2 transformedPoint) {
+        return transformedPoint.set(x, y).mul(getLocalToWorldMatrix(entityId));
     }
 
     public Vector2 transformPoint(int entityId, Vector2 localPoint) {
-        return transformPoint(entityId, localPoint.x, localPoint.y);
+        return transformPoint(entityId, localPoint.x, localPoint.y, localPoint);
     }
 
-    public Vector2 inverseTransformPoint(int entityId, float x, float y) {
-        return new Vector2(x, y).mul(getWorldToLocalMatrix(entityId));
+    public Vector2 inverseTransformPoint(int entityId, float x, float y, Vector2 transformedPoint) {
+        return transformedPoint.set(x, y).mul(getWorldToLocalMatrix(entityId));
     }
 
     public Vector2 inverseTransformPoint(int entityId, Vector2 worldPoint) {
-        return inverseTransformPoint(entityId, worldPoint.x, worldPoint.y);
+        return inverseTransformPoint(entityId, worldPoint.x, worldPoint.y, worldPoint);
     }
 
     public Vector2 transformDirection(int entityId, Vector2 localDirection) {
         Matrix3 matrix = getLocalToWorldMatrix(entityId);
-        return mulNormal(localDirection.cpy(), matrix);
+        return mulNormal(localDirection, matrix);
     }
 
     public Vector2 inverseTransformDirection(int entityId, Vector2 worldDirection) {
         Matrix3 matrix = getWorldToLocalMatrix(entityId);
-        return mulNormal(worldDirection.cpy(), matrix);
+        return mulNormal(worldDirection, matrix);
     }
 
     private Vector2 mulNormal(Vector2 vec, Matrix3 matrix) {
@@ -292,30 +308,26 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         return vec;
     }
 
-    public Vector2 transformVector(int entityId, float x, float y) {
+    public Vector2 transformVector(int entityId, float x, float y, Vector2 result) {
         Matrix3 matrix = getLocalToWorldMatrix(entityId);
-
-        Vector2 result = new Vector2();
         matrix.getScale(result);
         result.scl(x, y);
         return result;
     }
 
     public Vector2 transformVector(int entityId, Vector2 localVector) {
-        return transformVector(entityId, localVector.x, localVector.y);
+        return transformVector(entityId, localVector.x, localVector.y, localVector);
     }
 
-    public Vector2 inverseTransformVector(int entityId, float x, float y) {
+    public Vector2 inverseTransformVector(int entityId, float x, float y, Vector2 result) {
         Matrix3 matrix = getWorldToLocalMatrix(entityId);
-
-        Vector2 result = new Vector2();
         matrix.getScale(result);
         result.scl(x, y);
         return result;
     }
 
     public Vector2 inverseTransformVector(int entityId, Vector2 worldVector) {
-        return inverseTransformVector(entityId, worldVector.x, worldVector.y);
+        return inverseTransformVector(entityId, worldVector.x, worldVector.y, worldVector);
     }
     //endregion
 
@@ -327,9 +339,9 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
             }
         }
 
-        localToParentCache.remove(entityId);
-        localToWorldCache.remove(entityId);
-        worldToLocalCache.remove(entityId);
+        matrixPool.free(localToParentCache.remove(entityId));
+        matrixPool.free(localToWorldCache.remove(entityId));
+        matrixPool.free(worldToLocalCache.remove(entityId));
     }
 
     @Override

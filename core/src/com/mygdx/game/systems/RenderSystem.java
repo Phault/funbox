@@ -50,8 +50,8 @@ public class RenderSystem extends IteratingSystem
         float width = sprite.texture.getRegionWidth();
         float height = sprite.texture.getRegionHeight();
 
-        float originX = sprite.Origin.x * width;
-        float originY = sprite.Origin.y * height;
+        float originX = sprite.origin.x * width;
+        float originY = sprite.origin.y * height;
 
         spriteBatch.draw(sprite.texture,
                 pos.x - originX,

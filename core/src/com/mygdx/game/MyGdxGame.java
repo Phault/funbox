@@ -7,14 +7,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.mygdx.game.components.Parented;
-import com.mygdx.game.components.Sprite;
-import com.mygdx.game.components.TestMovement;
-import com.mygdx.game.components.Transform;
-import com.mygdx.game.systems.CameraSystem;
-import com.mygdx.game.systems.RenderSystem;
-import com.mygdx.game.systems.TestMovementSystem;
-import com.mygdx.game.systems.WorldTransformationManager;
+import com.mygdx.game.components.*;
+import com.mygdx.game.systems.*;
 
 public class MyGdxGame extends ApplicationAdapter {
 	Texture img;
@@ -28,6 +22,7 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new EntityLinkManager())
                 .with(new WorldTransformationManager())
                 .with(new TestMovementSystem())
+                .with(new VelocitySystem())
                 .with(new CameraSystem())
                 .with(new RenderSystem())
                 .build();
@@ -36,6 +31,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
         int parent = world.create();
         world.edit(parent).create(TestMovement.class);
+        world.edit(parent).create(Velocity.class);
         world.edit(parent).create(Sprite.class).texture = new TextureRegion(img);
         Transform parentTransform = world.edit(parent).create(Transform.class);
         parentTransform.position.set(200, 0);
@@ -49,8 +45,7 @@ public class MyGdxGame extends ApplicationAdapter {
         childTransform.rotation = -45;
         childTransform.scale.set(2, 1);
         world.edit(child).create(Parented.class).target = parent;
-
-        world.getSystem(CameraSystem.class).setCameraEntity(child);
+        world.edit(child).create(Velocity.class).y = 10;
     }
 
     @Override

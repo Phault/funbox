@@ -39,12 +39,15 @@ public class RenderSystem extends IteratingSystem
         spriteBatch.begin();
     }
 
+    private final Vector2 pos = new Vector2();
+    private final Vector2 scale = new Vector2();
+
     @Override
     protected void process(int entityId) {
         Sprite sprite = mSprite.get(entityId);
 
-        Vector2 pos = transformManager.getWorldPosition(entityId);
-        Vector2 scale = transformManager.getWorldScale(entityId);
+        transformManager.getWorldPosition(entityId, pos);
+        transformManager.getWorldScale(entityId, scale);
         float rotation = transformManager.getWorldRotation(entityId);
 
         float width = sprite.texture.getRegionWidth();

@@ -2,27 +2,21 @@ package com.mygdx.game.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
-import com.artemis.link.EntityLinkManager;
-import com.artemis.link.LinkListener;
 import com.artemis.utils.IntBag;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.game.components.Children;
-import com.mygdx.game.components.Parented;
 import com.mygdx.game.components.Transform;
 
 /**
  * Created by Casper on 19-07-2016.
  */
-public class WorldTransformationManager extends BaseSystem implements LinkListener {
+public class WorldTransformationManager extends BaseSystem implements HierarchyManager.HierarchyChangedListener {
 
-    private ComponentMapper<Parented> mParented;
-    private ComponentMapper<Children> mChildren;
     private ComponentMapper<Transform> mTransform;
+    private HierarchyManager hierarchyManager;
 
     private final IntMap<Matrix3> localToParentCache = new IntMap<Matrix3>();
     private final IntMap<Matrix3> localToWorldCache = new IntMap<Matrix3>();
@@ -40,15 +34,11 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         }
     };
 
-    public WorldTransformationManager() {
-
-    }
-
     @Override
     protected void initialize() {
         super.initialize();
 
-        world.getSystem(EntityLinkManager.class).register(Parented.class, this);
+        hierarchyManager.registerListener(this);
     }
 
     @Override
@@ -59,25 +49,13 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
         localToWorldCache.clear();
         worldToLocalCache.clear();
         matrixPool.clear();
+
+        hierarchyManager.unregisterListener(this);
     }
 
     @Override
     protected void processSystem() {
 
-    }
-
-    public int getParent(int entityId) {
-        Parented parented = mParented.get(entityId);
-        return parented != null
-                ? parented.target
-                : -1;
-    }
-
-    public IntBag getChildren(int entityId) {
-        Children children = mChildren.get(entityId);
-        return children != null
-                ? children.targets
-                : null;
     }
 
     //region Local Properties
@@ -152,7 +130,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     public Vector2 getWorldPosition(int entityId, Vector2 result) {
         getLocalPosition(entityId, result);
 
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
         if (parent != -1)
             return transformPoint(parent, result);
 
@@ -162,7 +140,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     private static final Vector2 tmpVector = new Vector2();
 
     public void setWorldPosition(int entityId, float x, float y) {
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
         if (parent != -1)
         {
             inverseTransformPoint(parent, x, y, tmpVector);
@@ -175,7 +153,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     public float getWorldRotation(int entityId) {
         float localRot = getLocalRotation(entityId);
 
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
         if (parent != -1)
             return getLocalRotation(parent) + localRot;
 
@@ -183,7 +161,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     }
 
     public void setWorldRotation(int entityId, float degrees) {
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
         if (parent != -1)
             setLocalRotation(entityId, degrees - getLocalRotation(parent));
         else
@@ -193,7 +171,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     public Vector2 getWorldScale(int entityId, Vector2 result) {
         getLocalScale(entityId, result);
 
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
         if (parent != -1)
             return transformVector(parent, result);
 
@@ -201,7 +179,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     }
 
     public void setWorldScale(int entityId, float x, float y) {
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
         if (parent != -1)
         {
             inverseTransformVector(parent, x, y, tmpVector);
@@ -251,7 +229,7 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
             return localToWorldCache.get(entityId);
 
         Matrix3 localToParentMatrix = getLocalToParentMatrix(entityId);
-        int parent = getParent(entityId);
+        int parent = hierarchyManager.getParent(entityId);
 
         Matrix3 result = matrixPool.obtain().set(localToParentMatrix);
 
@@ -332,61 +310,34 @@ public class WorldTransformationManager extends BaseSystem implements LinkListen
     //endregion
 
     private void markDirty(int entityId) {
-        IntBag children = getChildren(entityId);
+        IntBag children = hierarchyManager.getChildren(entityId);
         if (children != null) {
             for (int i = 0; i < children.size(); i++) {
                 markDirty(children.get(i));
             }
         }
 
-        matrixPool.free(localToParentCache.remove(entityId));
-        matrixPool.free(localToWorldCache.remove(entityId));
-        matrixPool.free(worldToLocalCache.remove(entityId));
+        Matrix3 localToParentMatrix = localToParentCache.remove(entityId);
+        Matrix3 localToWorldMatrix = localToWorldCache.remove(entityId);
+        Matrix3 worldToLocalMatrix = worldToLocalCache.remove(entityId);
+
+        if (localToParentMatrix != null)
+            matrixPool.free(localToParentMatrix);
+        if (localToWorldMatrix != null)
+            matrixPool.free(localToWorldMatrix);
+        if (worldToLocalMatrix != null)
+            matrixPool.free(worldToLocalMatrix);
     }
 
     @Override
-    public void onLinkEstablished(int sourceId, int targetId) {
-        Gdx.app.log("WTM", "link established");
-
-        Children children = mChildren.create(targetId);
-        children.targets.add(sourceId);
-
-        markDirty(sourceId);
+    public void onParentChanged(int child, int prevParent, int newParent) {
+        markDirty(child);
     }
 
     @Override
-    public void onLinkKilled(int sourceId, int targetId) {
-        Gdx.app.log("WTM", "link killed");
+    public void onParentDied(int child, int deadParent) {
+        // onParentChanged is called when the parent dies as well, so no reason to mark dirty here
 
-        removeFromChildren(sourceId, targetId);
-    }
-
-    @Override
-    public void onTargetDead(int sourceId, int deadTargetId) {
-        Gdx.app.log("WTM", "link target dead");
-
-        mParented.remove(sourceId);
-        markDirty(sourceId);
-    }
-
-    @Override
-    public void onTargetChanged(int sourceId, int targetId, int oldTargetId) {
-        Gdx.app.log("WTM", "link target changed");
-
-        Children children = mChildren.create(targetId);
-        children.targets.add(sourceId);
-        removeFromChildren(sourceId, oldTargetId);
-    }
-
-    private void removeFromChildren(int childId, int parentId) {
-        Children children = mChildren.get(parentId);
-        if (children != null)
-        {
-            children.targets.removeValue(childId);
-            if (children.targets.size() == 0)
-                mChildren.remove(parentId);
-        }
-
-        markDirty(childId);
+        // todo: perhaps delete child when parent is deleted?
     }
 }

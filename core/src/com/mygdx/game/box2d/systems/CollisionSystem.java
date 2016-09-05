@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.IntMap;
 import com.mygdx.game.box2d.components.FixtureComponent;
 import com.mygdx.game.box2d.components.Rigidbody;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
+import jdk.nashorn.internal.objects.Global;
 
 /**
  * Created by Casper on 06-08-2016.
@@ -34,6 +35,8 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
 
     private Body staticBody;
     private final static BodyDef staticBodyDef = new BodyDef();
+
+    private final static int GlobalListenerId = -1000;
 
     public CollisionSystem() {
         super(Aspect.all(com.mygdx.game.scenegraph.components.Transform.class, Rigidbody.class));
@@ -174,6 +177,14 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         destroyFixture(entityId);
     }
 
+    public void addGlobalListener(ICollisionListener listener) {
+        addListener(GlobalListenerId, listener);
+    }
+
+    public void removeGlobalListener(ICollisionListener listener) {
+        removeListener(GlobalListenerId, listener);
+    }
+
     public void addListener(int entityId, ICollisionListener listener) {
         Bag<ICollisionListener> listenerBag = listeners.get(entityId);
 
@@ -202,92 +213,76 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         listeners.remove(entityId);
     }
 
-    // todo: so much repeated logic, clean this up somehow
     @Override
     public void beginContact(Contact contact) {
-        int idA = getEntityId(contact.getFixtureA());
-        int idB = getEntityId(contact.getFixtureB());
+        int idA = getBodyId(contact.getFixtureA());
+        int idB = getBodyId(contact.getFixtureB());
 
-        Bag<ICollisionListener> relatedListeners;
+        emitBeginContact(listeners.get(idA), idA, idB, contact);
+        emitBeginContact(listeners.get(idB), idB, idA, contact);
+        emitBeginContact(listeners.get(GlobalListenerId), idA, idB, contact);
+    }
 
-        relatedListeners = listeners.get(idA);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                listener.onContactBegin(idA, idB, contact);
-            }
-        }
-
-        relatedListeners = listeners.get(idB);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                listener.onContactBegin(idB, idA, contact);
+    private void emitBeginContact(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact) {
+        if (listeners != null) {
+            for (ICollisionListener listener : listeners) {
+                listener.onContactBegin(thisId, otherId, contact);
             }
         }
     }
 
     @Override
     public void endContact(Contact contact) {
-        int idA = getEntityId(contact.getFixtureA());
-        int idB = getEntityId(contact.getFixtureB());
+        int idA = getBodyId(contact.getFixtureA());
+        int idB = getBodyId(contact.getFixtureB());
 
-        Bag<ICollisionListener> relatedListeners;
+        emitEndContact(listeners.get(idA), idA, idB, contact);
+        emitEndContact(listeners.get(idB), idB, idA, contact);
+        emitEndContact(listeners.get(GlobalListenerId), idA, idB, contact);
+    }
 
-        relatedListeners = listeners.get(idA);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                listener.onContactEnd(idA, idB, contact);
-            }
-        }
-
-        relatedListeners = listeners.get(idB);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                listener.onContactEnd(idB, idA, contact);
+    private void emitEndContact(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact) {
+        if (listeners != null) {
+            for (ICollisionListener listener : listeners) {
+                listener.onContactEnd(thisId, otherId, contact);
             }
         }
     }
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-        int idA = getEntityId(contact.getFixtureA());
-        int idB = getEntityId(contact.getFixtureB());
+        int idA = getBodyId(contact.getFixtureA());
+        int idB = getBodyId(contact.getFixtureB());
 
-        Bag<ICollisionListener> relatedListeners;
+        // todo: fixture order inside the contact is currently reversed compared to thisId and otherId parameters
 
-        relatedListeners = listeners.get(idA);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                listener.onPreSolve(idA, idB, contact, oldManifold);
-            }
-        }
+        emitPreSolve(listeners.get(idA), idA, idB, contact, oldManifold);
+        emitPreSolve(listeners.get(idB), idB, idA, contact, oldManifold);
+        emitPreSolve(listeners.get(GlobalListenerId), idA, idB, contact, oldManifold);
+    }
 
-        relatedListeners = listeners.get(idB);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                // todo: fixture order inside the contact is currently reversed compared to thisId and otherId parameters
-                listener.onPreSolve(idB, idA, contact, oldManifold);
+    private void emitPreSolve(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact, Manifold oldManifold) {
+        if (listeners != null) {
+            for (ICollisionListener listener : listeners) {
+                listener.onPreSolve(thisId, otherId, contact, oldManifold);
             }
         }
     }
 
     @Override
     public void postSolve(Contact contact, ContactImpulse impulse) {
-        int idA = getEntityId(contact.getFixtureA());
-        int idB = getEntityId(contact.getFixtureB());
-        Bag<ICollisionListener> relatedListeners;
+        int idA = getBodyId(contact.getFixtureA());
+        int idB = getBodyId(contact.getFixtureB());
 
-        relatedListeners = listeners.get(idA);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                listener.onPostSolve(idA, idB, contact, impulse);
-            }
-        }
+        emitPostSolve(listeners.get(idA), idA, idB, contact, impulse);
+        emitPostSolve(listeners.get(idB), idB, idA, contact, impulse);
+        emitPostSolve(listeners.get(GlobalListenerId), idA, idB, contact, impulse);
+    }
 
-        relatedListeners = listeners.get(idB);
-        if (relatedListeners != null) {
-            for (ICollisionListener listener : relatedListeners) {
-                // todo: fixture order inside the contact is currently reversed compared to thisId and otherId parameters
-                listener.onPostSolve(idB, idA, contact, impulse);
+    private void emitPostSolve(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact, ContactImpulse impulse) {
+        if (listeners != null) {
+            for (ICollisionListener listener : listeners) {
+                listener.onPostSolve(thisId, otherId, contact, impulse);
             }
         }
     }
@@ -304,6 +299,13 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
             return -1;
 
         return (Integer) body.getUserData();
+    }
+
+    private int getBodyId(Fixture fixture) {
+        if (fixture != null)
+            return getEntityId(fixture.getBody());
+
+        return -1;
     }
 
     @Override

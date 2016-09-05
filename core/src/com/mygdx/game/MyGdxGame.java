@@ -14,6 +14,7 @@ import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.components.*;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
+import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 import com.mygdx.game.systems.*;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -29,7 +30,7 @@ public class MyGdxGame extends ApplicationAdapter {
         WorldConfiguration config = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
                 .with(new HierarchyManager())
-                .with(new com.mygdx.game.scenegraph.systems.WorldTransformationManager())
+                .with(new WorldTransformationManager())
                 .with(collisionSystem)
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())

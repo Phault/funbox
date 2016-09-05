@@ -23,7 +23,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
 	public void create () {
-        img = new Texture("badlogic.jpg");
+        img = new Texture("square.png");
 
         CollisionSystem collisionSystem = new CollisionSystem();
 
@@ -50,7 +50,7 @@ public class MyGdxGame extends ApplicationAdapter {
         edit.create(TestMovement.class);
         Body boxBody = collisionSystem.createBody(box, def);
         PolygonShape boxShape = new PolygonShape();
-        boxShape.setAsBox(1, 1);
+        boxShape.setAsBox(0.5f, 0.5f);
         boxBody.createFixture(boxShape, 1);
         Sprite sprite = edit.create(Sprite.class);
         sprite.texture = new TextureRegion(img);

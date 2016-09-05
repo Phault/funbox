@@ -1,4 +1,4 @@
-package com.mygdx.game.systems;
+package com.mygdx.game.hierarchy.systems;
 
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
@@ -8,8 +8,8 @@ import com.artemis.link.EntityLinkManager;
 import com.artemis.link.LinkListener;
 import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
-import com.mygdx.game.components.Children;
-import com.mygdx.game.components.Parented;
+import com.mygdx.game.hierarchy.components.Children;
+import com.mygdx.game.hierarchy.components.Parented;
 
 /**
  * Created by Casper on 12-08-2016.

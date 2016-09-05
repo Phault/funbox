@@ -8,10 +8,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.physics.box2d.*;
+import com.mygdx.game.box2d.systems.Box2DDebugRenderSystem;
+import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.components.*;
-import com.mygdx.game.components.Transform;
+import com.mygdx.game.scenegraph.components.Transform;
+import com.mygdx.game.hierarchy.systems.HierarchyManager;
 import com.mygdx.game.systems.*;
 
 public class MyGdxGame extends ApplicationAdapter {
@@ -27,7 +29,7 @@ public class MyGdxGame extends ApplicationAdapter {
         WorldConfiguration config = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
                 .with(new HierarchyManager())
-                .with(new WorldTransformationManager())
+                .with(new com.mygdx.game.scenegraph.systems.WorldTransformationManager())
                 .with(collisionSystem)
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())

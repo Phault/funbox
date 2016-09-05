@@ -1,9 +1,10 @@
-package com.mygdx.game.systems;
+package com.mygdx.game.box2d.systems;
 
 import com.artemis.BaseSystem;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.mygdx.game.systems.CameraSystem;
 
 /**
  * Created by Casper on 18-08-2016.

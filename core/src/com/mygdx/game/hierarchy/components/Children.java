@@ -1,4 +1,4 @@
-package com.mygdx.game.components;
+package com.mygdx.game.hierarchy.components;
 
 import com.artemis.PooledComponent;
 import com.artemis.annotations.EntityId;

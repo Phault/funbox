@@ -1,8 +1,7 @@
-package com.mygdx.game.systems;
+package com.mygdx.game.box2d.systems;
 
 import com.artemis.*;
 import com.artemis.utils.Bag;
-import com.artemis.utils.IntBag;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -10,15 +9,16 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
-import com.mygdx.game.components.FixtureComponent;
-import com.mygdx.game.components.Rigidbody;
+import com.mygdx.game.box2d.components.FixtureComponent;
+import com.mygdx.game.box2d.components.Rigidbody;
+import com.mygdx.game.hierarchy.systems.HierarchyManager;
 
 /**
  * Created by Casper on 06-08-2016.
  */
 public class CollisionSystem extends BaseEntitySystem implements ContactListener {
 
-    private WorldTransformationManager transformManager;
+    private com.mygdx.game.scenegraph.systems.WorldTransformationManager transformManager;
     private HierarchyManager hierarchyManager;
 
     private float pixelsPerMeter = 100;
@@ -36,7 +36,7 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
     private final static BodyDef staticBodyDef = new BodyDef();
 
     public CollisionSystem() {
-        super(Aspect.all(com.mygdx.game.components.Transform.class, Rigidbody.class));
+        super(Aspect.all(com.mygdx.game.scenegraph.components.Transform.class, Rigidbody.class));
         Box2D.init();
 
         physicsWorld = new World(gravity, true);

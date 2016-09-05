@@ -5,7 +5,7 @@ import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.mygdx.game.components.Rigidbody;
+import com.mygdx.game.box2d.components.Rigidbody;
 import com.mygdx.game.components.TestMovement;
 
 /**

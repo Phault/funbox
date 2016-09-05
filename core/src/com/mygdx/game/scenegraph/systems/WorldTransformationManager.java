@@ -1,4 +1,4 @@
-package com.mygdx.game.systems;
+package com.mygdx.game.scenegraph.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
@@ -8,7 +8,8 @@ import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.game.components.Transform;
+import com.mygdx.game.scenegraph.components.Transform;
+import com.mygdx.game.hierarchy.systems.HierarchyManager;
 
 /**
  * Created by Casper on 19-07-2016.

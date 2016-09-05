@@ -1,4 +1,4 @@
-package com.mygdx.game.components;
+package com.mygdx.game.box2d.components;
 
 import com.artemis.PooledComponent;
 import com.badlogic.gdx.physics.box2d.Body;

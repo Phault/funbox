@@ -6,14 +6,14 @@ import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.components.Sprite;
-import com.mygdx.game.components.Transform;
+import com.mygdx.game.scenegraph.components.Transform;
 
 /**
  * Created by Casper on 19-07-2016.
  */
 public class RenderSystem extends IteratingSystem
 {
-    private WorldTransformationManager transformManager;
+    private com.mygdx.game.scenegraph.systems.WorldTransformationManager transformManager;
     private ComponentMapper<Sprite> mSprite;
     private ComponentMapper<Transform> mTransform;
 

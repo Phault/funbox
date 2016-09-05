@@ -1,4 +1,4 @@
-package com.mygdx.game.components;
+package com.mygdx.game.scenegraph.components;
 
 import com.artemis.PooledComponent;
 import com.badlogic.gdx.math.Vector2;

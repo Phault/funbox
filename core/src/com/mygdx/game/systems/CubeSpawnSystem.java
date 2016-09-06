@@ -3,6 +3,7 @@ package com.mygdx.game.systems;
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -46,6 +47,7 @@ public class CubeSpawnSystem extends BaseSystem {
     }
 
     private final Vector3 tmpWorldPoint = new Vector3();
+    private final Color tmpColor = new Color();
 
     @Override
     protected void processSystem() {
@@ -56,16 +58,18 @@ public class CubeSpawnSystem extends BaseSystem {
             tmpWorldPoint.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             cameraSystem.getCamera().unproject(tmpWorldPoint);
 
-            spawnCube(tmpWorldPoint.x, tmpWorldPoint.y, width, height);
+            tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+
+            spawnCube(tmpWorldPoint.x, tmpWorldPoint.y, width, height, tmpColor);
         }
     }
 
-    public int spawnCube(float x, float y, float height, float width) {
+    public int spawnCube(float x, float y, float width, float height, Color color) {
         int cube = world.create();
         EntityEdit edit = world.edit(cube);
         edit.create(Transform.class);
         edit.create(TestMovement.class);
-        
+
         Body boxBody = collisionSystem.createBody(cube, bodyDef);
         PolygonShape boxShape = new PolygonShape();
         boxShape.setAsBox(width * 0.5f * collisionSystem.getMetersPerPixel(),
@@ -74,6 +78,7 @@ public class CubeSpawnSystem extends BaseSystem {
 
         Sprite sprite = edit.create(Sprite.class);
         sprite.texture = new TextureRegion(img);
+        sprite.tint.set(color);
 
         float scaleX = width / sprite.texture.getRegionWidth();
         float scaleY = height / sprite.texture.getRegionHeight();

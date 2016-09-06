@@ -2,6 +2,7 @@ package com.mygdx.game.components;
 
 import com.artemis.PooledComponent;
 import com.artemis.annotations.Transient;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -12,6 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 public class Sprite extends PooledComponent {
     public TextureRegion texture = null;
     public Vector2 origin = new Vector2(0.5f, 0.5f);
+    public Color tint = new Color(1, 1, 1, 1);
 
     @Override
     protected void reset() {

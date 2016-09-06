@@ -3,6 +3,7 @@ package com.mygdx.game.systems;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.components.Sprite;
@@ -20,6 +21,7 @@ public class RenderSystem extends IteratingSystem
     private CameraSystem cameraSystem;
 
     private SpriteBatch spriteBatch;
+    private final Color originalTint = new Color();
 
     public RenderSystem() {
         super(Aspect.all(Sprite.class, Transform.class));
@@ -34,7 +36,7 @@ public class RenderSystem extends IteratingSystem
 
     @Override
     protected void begin() {
-
+        originalTint.set(spriteBatch.getColor());
         spriteBatch.setProjectionMatrix(cameraSystem.getMatrix());
         spriteBatch.begin();
     }
@@ -56,6 +58,8 @@ public class RenderSystem extends IteratingSystem
         float originX = sprite.origin.x * width;
         float originY = sprite.origin.y * height;
 
+        spriteBatch.setColor(sprite.tint);
+
         spriteBatch.draw(sprite.texture,
                 pos.x - originX,
                 pos.y - originY,
@@ -71,6 +75,7 @@ public class RenderSystem extends IteratingSystem
     @Override
     protected void end() {
         spriteBatch.end();
+        spriteBatch.setColor(originalTint);
     }
 
     @Override

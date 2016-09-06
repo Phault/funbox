@@ -51,11 +51,13 @@ public class HierarchyManager extends BaseEntitySystem implements LinkListener {
                 : -1;
     }
 
+    private final static IntBag emptyIntBag = new IntBag(0);
+
     public IntBag getChildren(int entityId) {
         Children children = mChildren.get(entityId);
         return children != null
                 ? children.targets
-                : null;
+                : emptyIntBag;
     }
 
     public <T extends Component> int getEntityWithComponentInParent(int childId, Class<T> type) {
@@ -177,5 +179,17 @@ public class HierarchyManager extends BaseEntitySystem implements LinkListener {
     public interface HierarchyChangedListener {
         void onParentChanged(int child, int prevParent, int newParent);
         void onParentDied(int child, int deadParent);
+    }
+
+    public void runActionRecursively(int entityId, RecursiveAction action) {
+        action.run(entityId);
+
+        IntBag children = getChildren(entityId);
+        for (int i = 0; i < children.size(); i++)
+            runActionRecursively(children.get(i), action);
+    }
+
+    public interface RecursiveAction {
+        void run(int entityId);
     }
 }

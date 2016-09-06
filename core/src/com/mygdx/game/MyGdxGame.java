@@ -1,62 +1,51 @@
 package com.mygdx.game;
 
-import com.artemis.*;
+import com.artemis.EntityEdit;
 import com.artemis.World;
+import com.artemis.WorldConfiguration;
+import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.mygdx.game.box2d.systems.Box2DDebugRenderSystem;
 import com.mygdx.game.box2d.systems.CollisionSystem;
-import com.mygdx.game.components.*;
-import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
+import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
-import com.mygdx.game.systems.*;
+import com.mygdx.game.systems.CameraSystem;
+import com.mygdx.game.systems.CubeSpawnSystem;
+import com.mygdx.game.systems.RenderSystem;
+import com.mygdx.game.systems.TestMovementSystem;
 
 public class MyGdxGame extends ApplicationAdapter {
-    private Texture img;
     private World world;
+
+    private CollisionSystem collisionSystem = new CollisionSystem();
+    private WorldTransformationManager worldTransformationManager = new WorldTransformationManager();
 
     @Override
 	public void create () {
-        img = new Texture("square.png");
-
-        CollisionSystem collisionSystem = new CollisionSystem();
-
-        WorldConfiguration config = new WorldConfigurationBuilder()
+        WorldConfigurationBuilder builder = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
                 .with(new HierarchyManager())
-                .with(new WorldTransformationManager())
+                .with(worldTransformationManager)
                 .with(collisionSystem)
+                .with(new CubeSpawnSystem())
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())
-                .with(new RenderSystem())
-                .with(new Box2DDebugRenderSystem())
-                .build();
+                .with(new RenderSystem());
+
+        if (isDebugging())
+            builder.with(new Box2DDebugRenderSystem());
+
+        WorldConfiguration config = builder.build();
 
         world = new World(config);
 
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.DynamicBody;
-        def.position.set(0, 10);
-
-        int box = world.create();
-        EntityEdit edit = world.edit(box);
-        edit.create(Transform.class);
-        edit.create(TestMovement.class);
-        Body boxBody = collisionSystem.createBody(box, def);
-        PolygonShape boxShape = new PolygonShape();
-        boxShape.setAsBox(0.5f, 0.5f);
-        boxBody.createFixture(boxShape, 1);
-        Sprite sprite = edit.create(Sprite.class);
-        sprite.texture = new TextureRegion(img);
-
         int ground = world.create();
-        edit = world.edit(ground);
+        EntityEdit edit = world.edit(ground);
         edit.create(Transform.class);
         EdgeShape groundShape = new EdgeShape();
         groundShape.set(-100, 0, 100, 0);
@@ -81,6 +70,11 @@ public class MyGdxGame extends ApplicationAdapter {
 //        world.edit(child).create(Velocity.class).y = 10;
     }
 
+    public static boolean isDebugging() {
+        return java.lang.management.ManagementFactory.getRuntimeMXBean().
+                getInputArguments().toString().indexOf("jdwp") >= 0;
+    }
+
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
@@ -98,7 +92,6 @@ public class MyGdxGame extends ApplicationAdapter {
 	
 	@Override
 	public void dispose () {
-		img.dispose();
         world.dispose();
 	}
 }

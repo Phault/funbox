@@ -12,23 +12,26 @@ import com.badlogic.gdx.utils.IntMap;
 import com.mygdx.game.box2d.components.FixtureComponent;
 import com.mygdx.game.box2d.components.Rigidbody;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
-import jdk.nashorn.internal.objects.Global;
+import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 
 /**
  * Created by Casper on 06-08-2016.
  */
-public class CollisionSystem extends BaseEntitySystem implements ContactListener {
+public class CollisionSystem extends BaseEntitySystem implements ContactListener, WorldTransformationManager.TransformationChangedListener {
 
     private com.mygdx.game.scenegraph.systems.WorldTransformationManager transformManager;
     private HierarchyManager hierarchyManager;
 
     private float pixelsPerMeter = 100;
+    private float metersPerPixel = 1/pixelsPerMeter;
+
     private Vector2 gravity = new Vector2(0, -10);
     private World physicsWorld;
 
     private float timeStep = 1/60f;
     private int velocityIterations = 6;
     private int positionIterations = 2;
+    private boolean isProcessingTransformations;
 
     private ComponentMapper<FixtureComponent> mFixtureComponent;
     private ComponentMapper<Rigidbody> mRigidbody;
@@ -49,7 +52,21 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
 
     private float accumulator = 0;
 
-    private IntMap<Bag<ICollisionListener>> listeners = new IntMap<Bag<ICollisionListener>>();
+    private IntMap<Bag<CollisionListener>> listeners = new IntMap<Bag<CollisionListener>>();
+
+    @Override
+    protected void initialize() {
+        super.initialize();
+
+        transformManager.registerListener(this);
+    }
+
+    @Override
+    protected void dispose() {
+        super.dispose();
+
+        transformManager.unregisterListener(this);
+    }
 
     @Override
     protected void processSystem() {
@@ -61,6 +78,7 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
             accumulator -= timeStep;
         }
 
+        isProcessingTransformations = true;
         for (IntMap.Entry<Body> entry : bodyLinks) {
             int entityId = entry.key;
             Body body = entry.value;
@@ -71,6 +89,7 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
             transformManager.setWorldPosition(entityId, position.x * pixelsPerMeter, position.y * pixelsPerMeter);
             transformManager.setWorldRotation(entityId, rotation);
         }
+        isProcessingTransformations = false;
     }
 
     private IntMap<Fixture> fixtureLinks = new IntMap<Fixture>();
@@ -177,27 +196,27 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         destroyFixture(entityId);
     }
 
-    public void addGlobalListener(ICollisionListener listener) {
+    public void addGlobalListener(CollisionListener listener) {
         addListener(GlobalListenerId, listener);
     }
 
-    public void removeGlobalListener(ICollisionListener listener) {
+    public void removeGlobalListener(CollisionListener listener) {
         removeListener(GlobalListenerId, listener);
     }
 
-    public void addListener(int entityId, ICollisionListener listener) {
-        Bag<ICollisionListener> listenerBag = listeners.get(entityId);
+    public void addListener(int entityId, CollisionListener listener) {
+        Bag<CollisionListener> listenerBag = listeners.get(entityId);
 
         if (listenerBag == null) {
-            listenerBag = new Bag<ICollisionListener>();
+            listenerBag = new Bag<CollisionListener>();
             listeners.put(entityId, listenerBag);
         }
 
         listenerBag.add(listener);
     }
 
-    public void removeListener(int entityId, ICollisionListener listener) {
-        Bag<ICollisionListener> listenerBag = listeners.get(entityId);
+    public void removeListener(int entityId, CollisionListener listener) {
+        Bag<CollisionListener> listenerBag = listeners.get(entityId);
 
         if (listenerBag == null)
             return;
@@ -223,9 +242,9 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         emitBeginContact(listeners.get(GlobalListenerId), idA, idB, contact);
     }
 
-    private void emitBeginContact(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact) {
+    private void emitBeginContact(Bag<CollisionListener> listeners, int thisId, int otherId, Contact contact) {
         if (listeners != null) {
-            for (ICollisionListener listener : listeners) {
+            for (CollisionListener listener : listeners) {
                 listener.onContactBegin(thisId, otherId, contact);
             }
         }
@@ -241,9 +260,9 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         emitEndContact(listeners.get(GlobalListenerId), idA, idB, contact);
     }
 
-    private void emitEndContact(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact) {
+    private void emitEndContact(Bag<CollisionListener> listeners, int thisId, int otherId, Contact contact) {
         if (listeners != null) {
-            for (ICollisionListener listener : listeners) {
+            for (CollisionListener listener : listeners) {
                 listener.onContactEnd(thisId, otherId, contact);
             }
         }
@@ -261,9 +280,9 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         emitPreSolve(listeners.get(GlobalListenerId), idA, idB, contact, oldManifold);
     }
 
-    private void emitPreSolve(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact, Manifold oldManifold) {
+    private void emitPreSolve(Bag<CollisionListener> listeners, int thisId, int otherId, Contact contact, Manifold oldManifold) {
         if (listeners != null) {
-            for (ICollisionListener listener : listeners) {
+            for (CollisionListener listener : listeners) {
                 listener.onPreSolve(thisId, otherId, contact, oldManifold);
             }
         }
@@ -279,9 +298,9 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         emitPostSolve(listeners.get(GlobalListenerId), idA, idB, contact, impulse);
     }
 
-    private void emitPostSolve(Bag<ICollisionListener> listeners, int thisId, int otherId, Contact contact, ContactImpulse impulse) {
+    private void emitPostSolve(Bag<CollisionListener> listeners, int thisId, int otherId, Contact contact, ContactImpulse impulse) {
         if (listeners != null) {
-            for (ICollisionListener listener : listeners) {
+            for (CollisionListener listener : listeners) {
                 listener.onPostSolve(thisId, otherId, contact, impulse);
             }
         }
@@ -322,12 +341,38 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
     public float getPixelsPerMeter() {
         return pixelsPerMeter;
     }
+    public float getMetersPerPixel() {
+        return metersPerPixel;
+    }
 
     public void setPixelsPerMeter(float pixelsPerMeter) {
         this.pixelsPerMeter = pixelsPerMeter;
+        metersPerPixel = 1 / pixelsPerMeter;
     }
 
-    public interface ICollisionListener {
+    private final Vector2 tmpPosition = new Vector2();
+
+    @Override
+    public void onTransformationChanged(int entityId) {
+        if (isProcessingTransformations)
+            return;
+
+        Body body = bodyLinks.get(entityId);
+
+        if (body != null) {
+            transformManager.getWorldPosition(entityId, tmpPosition);
+            float rotation = MathUtils.degreesToRadians * transformManager.getWorldRotation(entityId);
+
+            tmpPosition.scl(metersPerPixel);
+
+            body.setTransform(tmpPosition, rotation);
+        }
+
+        // todo: update fixture
+        // todo: recreate fixture with new scale (if changed)
+    }
+
+    public interface CollisionListener {
         void onContactBegin(int thisId, int otherId, Contact contact);
         void onContactEnd(int thisId, int otherId, Contact contact);
         void onPreSolve(int thisId, int otherId, Contact contact, Manifold oldManifold);

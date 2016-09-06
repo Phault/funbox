@@ -2,6 +2,7 @@ package com.mygdx.game.scenegraph.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.ComponentMapper;
+import com.artemis.utils.Bag;
 import com.artemis.utils.IntBag;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix3;
@@ -80,6 +81,8 @@ public class WorldTransformationManager extends BaseSystem implements HierarchyM
 
         transform.position.set(x, y);
         markDirty(entityId);
+
+        hierarchyManager.runActionRecursively(entityId, emitTransformationChanged);
     }
 
     public float getLocalRotation(int entityId) throws IllegalArgumentException {
@@ -102,6 +105,8 @@ public class WorldTransformationManager extends BaseSystem implements HierarchyM
 
         transform.rotation = degrees;
         markDirty(entityId);
+
+        hierarchyManager.runActionRecursively(entityId, emitTransformationChanged);
     }
 
     public Vector2 getLocalScale(int entityId, Vector2 localScale) throws IllegalArgumentException {
@@ -124,6 +129,8 @@ public class WorldTransformationManager extends BaseSystem implements HierarchyM
 
         transform.scale.set(x, y);
         markDirty(entityId);
+
+        hierarchyManager.runActionRecursively(entityId, emitTransformationChanged);
     }
     //endregion
 
@@ -310,24 +317,24 @@ public class WorldTransformationManager extends BaseSystem implements HierarchyM
     }
     //endregion
 
-    private void markDirty(int entityId) {
-        IntBag children = hierarchyManager.getChildren(entityId);
-        if (children != null) {
-            for (int i = 0; i < children.size(); i++) {
-                markDirty(children.get(i));
-            }
+    private HierarchyManager.RecursiveAction markDirtyAction = new HierarchyManager.RecursiveAction() {
+        @Override
+        public void run(int entityId) {
+            Matrix3 localToParentMatrix = localToParentCache.remove(entityId);
+            Matrix3 localToWorldMatrix = localToWorldCache.remove(entityId);
+            Matrix3 worldToLocalMatrix = worldToLocalCache.remove(entityId);
+
+            if (localToParentMatrix != null)
+                matrixPool.free(localToParentMatrix);
+            if (localToWorldMatrix != null)
+                matrixPool.free(localToWorldMatrix);
+            if (worldToLocalMatrix != null)
+                matrixPool.free(worldToLocalMatrix);
         }
+    };
 
-        Matrix3 localToParentMatrix = localToParentCache.remove(entityId);
-        Matrix3 localToWorldMatrix = localToWorldCache.remove(entityId);
-        Matrix3 worldToLocalMatrix = worldToLocalCache.remove(entityId);
-
-        if (localToParentMatrix != null)
-            matrixPool.free(localToParentMatrix);
-        if (localToWorldMatrix != null)
-            matrixPool.free(localToWorldMatrix);
-        if (worldToLocalMatrix != null)
-            matrixPool.free(worldToLocalMatrix);
+    private void markDirty(int entityId) {
+        hierarchyManager.runActionRecursively(entityId, markDirtyAction);
     }
 
     @Override
@@ -338,7 +345,29 @@ public class WorldTransformationManager extends BaseSystem implements HierarchyM
     @Override
     public void onParentDied(int child, int deadParent) {
         // onParentChanged is called when the parent dies as well, so no reason to mark dirty here
+    }
 
-        // todo: perhaps delete child when parent is deleted?
+    private final Bag<TransformationChangedListener> listeners = new Bag<TransformationChangedListener>();
+
+    public void registerListener(TransformationChangedListener listener)
+    {
+        listeners.add(listener);
+    }
+
+    public void unregisterListener(TransformationChangedListener listener)
+    {
+        listeners.remove(listener);
+    }
+
+    private HierarchyManager.RecursiveAction emitTransformationChanged = new HierarchyManager.RecursiveAction() {
+        @Override
+        public void run(int entityId) {
+            for (TransformationChangedListener listener : listeners)
+                listener.onTransformationChanged(entityId);
+        }
+    };
+
+    public interface TransformationChangedListener {
+        void onTransformationChanged(int entityId);
     }
 }

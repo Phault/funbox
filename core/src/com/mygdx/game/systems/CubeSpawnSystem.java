@@ -9,9 +9,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
+import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.components.Sprite;
 import com.mygdx.game.components.TestMovement;
@@ -44,24 +44,90 @@ public class CubeSpawnSystem extends BaseSystem {
 
         bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
+
+        groundBody = collisionSystem.getPhysicsWorld().createBody(new BodyDef());
     }
 
-    private final Vector3 tmpWorldPoint = new Vector3();
+    private final Vector3 worldPointer = new Vector3();
+    private final Vector2 physicsWorldPointer = new Vector2();
     private final Color tmpColor = new Color();
+    private Body draggedBody;
+    private MouseJoint joint;
+
+    private Body groundBody;
+
+    private boolean isDragging() {
+        return draggedBody != null;
+    }
+
+    private QueryCallback callback = new QueryCallback() {
+        @Override
+        public boolean reportFixture(Fixture fixture) {
+            if (fixture.testPoint(physicsWorldPointer.x, physicsWorldPointer.y)) {
+                draggedBody = fixture.getBody();
+                return false;
+            }
+
+            return true;
+        }
+    };
 
     @Override
     protected void processSystem() {
-        if (Gdx.input.justTouched()) {
-            float width = MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat());
-            float height = MathUtils.lerp(minSize.y, maxSize.y, random.nextFloat());
+        worldPointer.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+        cameraSystem.getCamera().unproject(worldPointer);
+        physicsWorldPointer.set(worldPointer.x, worldPointer.y).scl(collisionSystem.getMetersPerPixel());
 
-            tmpWorldPoint.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            cameraSystem.getCamera().unproject(tmpWorldPoint);
+        boolean touching = Gdx.input.isTouched();
 
-            tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+        if (touching) {
+            if (isDragging()) {
+                joint.setTarget(physicsWorldPointer);
+            }
+            else {
+                collisionSystem.getPhysicsWorld().QueryAABB(callback,
+                        physicsWorldPointer.x - 0.01f,
+                        physicsWorldPointer.y - 0.01f,
+                        physicsWorldPointer.x + 0.01f,
+                        physicsWorldPointer.y + 0.01f);
 
-            spawnCube(tmpWorldPoint.x, tmpWorldPoint.y, width, height, tmpColor);
+                if (draggedBody != null)
+                    startDrag(draggedBody);
+                else if (Gdx.input.justTouched())
+                    spawnRandomCube(worldPointer.x, worldPointer.y);
+            }
         }
+        else {
+            if (isDragging())
+                endDrag();
+        }
+    }
+
+    private void startDrag(Body body) {
+        MouseJointDef def = new MouseJointDef();
+        def.bodyA = groundBody;
+        def.bodyB = body;
+        def.collideConnected = false;
+        def.target.set(physicsWorldPointer.x, physicsWorldPointer.y);
+        def.maxForce = 500.0f * body.getMass();
+
+        joint = (MouseJoint)collisionSystem.getPhysicsWorld().createJoint(def);
+        body.setAwake(true);
+    }
+
+    private void endDrag() {
+        collisionSystem.getPhysicsWorld().destroyJoint(joint);
+        joint = null;
+        draggedBody = null;
+    }
+
+    private int spawnRandomCube(float x, float y) {
+        float width = MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat());
+        float height = MathUtils.lerp(minSize.y, maxSize.y, random.nextFloat());
+
+        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+
+        return spawnCube(worldPointer.x, worldPointer.y, width, height, tmpColor);
     }
 
     public int spawnCube(float x, float y, float width, float height, Color color) {

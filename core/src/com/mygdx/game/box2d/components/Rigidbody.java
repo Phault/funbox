@@ -1,11 +1,13 @@
 package com.mygdx.game.box2d.components;
 
 import com.artemis.PooledComponent;
+import com.artemis.annotations.Transient;
 import com.badlogic.gdx.physics.box2d.Body;
 
 /**
  * Created by Casper on 06-08-2016.
  */
+@Transient
 public class Rigidbody extends PooledComponent{
     public Body body;
 

@@ -71,8 +71,7 @@ public class MyGdxGame extends ApplicationAdapter {
     }
 
     public static boolean isDebugging() {
-        return java.lang.management.ManagementFactory.getRuntimeMXBean().
-                getInputArguments().toString().indexOf("jdwp") >= 0;
+        return false;
     }
 
     @Override

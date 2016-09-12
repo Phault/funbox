@@ -1,11 +1,11 @@
 apply plugin: "java"
 
-sourceCompatibility = 1.6
+sourceCompatibility = 1.7
 sourceSets.main.java.srcDirs = [ "src/" ]
 
 project.ext.mainClassName = "com.mygdx.game.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../android/assets");
-project.ext.weaveDir = new File("$buildDir/exploded");
+project.ext.weaveDir = new File("$buildDir/exploded")
 
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
@@ -15,12 +15,12 @@ task run(dependsOn: classes, type: JavaExec) {
     ignoreExitValue = true
 }
 
+// artemis-odb: package directory into jar.
 task dist(type: Jar) {
     from files(sourceSets.main.output.classesDir)
     from files(sourceSets.main.output.resourcesDir)
     from {configurations.compile.collect {zipTree(it)}}
-    from files(project.assetsDir);
- 
+    from files(project.assetsDir)
     manifest {
         attributes 'Main-Class': project.mainClassName
     }

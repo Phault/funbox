@@ -4,7 +4,6 @@ import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.mygdx.game.box2d.systems.CollisionSystem;
-import com.mygdx.game.components.TestMovement;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 import com.mygdx.game.shaperendering.components.*;
@@ -30,6 +28,9 @@ public class ShapeSpawnSystem extends BaseSystem {
     private CameraSystem cameraSystem;
 
     private Vector2 minSize = new Vector2(25, 25), maxSize = new Vector2(200, 200);
+
+    private float minTriangleAngle = 30, maxTriangleAngle = 150;
+    private float minTriangleLength = 25, maxTriangleLength = 200;
 
     private float minRadius = 10, maxRadius = 100;
 
@@ -193,17 +194,35 @@ public class ShapeSpawnSystem extends BaseSystem {
         return circle;
     }
 
-    private final Vector2[] tmpTriangle = new Vector2[] {new Vector2(), new Vector2(), new Vector2()};
-
     public int spawnRandomTriangle(float x, float y) {
+        Vector2[] triangle = generateTriangle(minSize.x, maxSize.x);
+        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+
+        return spawnTriangle(x, y, triangle, tmpColor);
+    }
+
+    private final Vector2[] genTriangle = new Vector2[] { new Vector2(), new Vector2(), new Vector2()};
+    private Vector2[] generateTriangle(float minEdgeLength, float maxEdgeLength) {
+        float firstAngle = (float) Math.PI * 2 * random.nextFloat();
+        float secondAngle = firstAngle + MathUtils.lerp(minTriangleAngle, maxTriangleAngle, random.nextFloat()) * MathUtils.degreesToRadians;
+
+        float firstLength = MathUtils.lerp(minEdgeLength, maxEdgeLength, random.nextFloat());
+        float secondLength = MathUtils.lerp(minEdgeLength, maxEdgeLength, random.nextFloat());
+
+        genTriangle[0].set(0, 0);
+        genTriangle[1].set(MathUtils.cos(firstAngle), MathUtils.sin(firstAngle)).scl(firstLength);
+        genTriangle[2].set(MathUtils.cos(secondAngle), MathUtils.sin(secondAngle)).scl(secondLength);
+
+        centerPolygon(genTriangle);
+
+        return genTriangle;
+    }
+
+    private static void centerPolygon(Vector2[] polygon) {
         float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
         float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
-        for (int i = 0; i < tmpTriangle.length; i++) {
-            Vector2 point = tmpTriangle[i];
-            point.set(MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat()),
-                    MathUtils.lerp(minSize.y,
-                            maxSize.y, random.nextFloat()));
-
+        for (int i = 0; i < polygon.length; i++) {
+            Vector2 point = polygon[i];
             minX = Math.min(point.x, minX);
             maxX = Math.max(point.x, maxX);
             minY = Math.min(point.y, minY);
@@ -213,13 +232,9 @@ public class ShapeSpawnSystem extends BaseSystem {
         float centerX = MathUtils.lerp(minX, maxX, 0.5f);
         float centerY = MathUtils.lerp(minY, maxY, 0.5f);
 
-        for (int i = 0; i < tmpTriangle.length; i++) {
-            tmpTriangle[i].sub(centerX, centerY);
+        for (int i = 0; i < polygon.length; i++) {
+            polygon[i].sub(centerX, centerY);
         }
-
-        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
-
-        return spawnTriangle(x, y, tmpTriangle, tmpColor);
     }
 
     public int spawnTriangle(float x, float y, Vector2[] points, Color color) {

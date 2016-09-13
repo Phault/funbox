@@ -219,21 +219,19 @@ public class ShapeSpawnSystem extends BaseSystem {
     }
 
     private static void centerPolygon(Vector2[] polygon) {
-        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
-        float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
+        float x = 0;
+        float y = 0;
         for (int i = 0; i < polygon.length; i++) {
             Vector2 point = polygon[i];
-            minX = Math.min(point.x, minX);
-            maxX = Math.max(point.x, maxX);
-            minY = Math.min(point.y, minY);
-            maxY = Math.max(point.y, maxY);
+            x += point.x;
+            y += point.y;
         }
 
-        float centerX = MathUtils.lerp(minX, maxX, 0.5f);
-        float centerY = MathUtils.lerp(minY, maxY, 0.5f);
+        x /= polygon.length;
+        y /= polygon.length;
 
         for (int i = 0; i < polygon.length; i++) {
-            polygon[i].sub(centerX, centerY);
+            polygon[i].sub(x, y);
         }
     }
 

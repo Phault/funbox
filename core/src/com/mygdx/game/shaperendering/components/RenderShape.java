@@ -9,8 +9,8 @@ import com.badlogic.gdx.math.Vector2;
  */
 public abstract class RenderShape extends PooledComponent {
 
-    public Color color = new Color(1, 1, 1, 1);
-    public Vector2 origin = new Vector2(0.5f, 0.5f);
+    public final Color color = new Color(1, 1, 1, 1);
+    public final Vector2 origin = new Vector2(0.5f, 0.5f);
 
     @Override
     protected void reset() {

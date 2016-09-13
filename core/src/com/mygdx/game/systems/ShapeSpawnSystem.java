@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.mygdx.game.box2d.systems.CollisionSystem;
+import com.mygdx.game.components.TestMovement;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 import com.mygdx.game.shaperendering.components.*;
@@ -121,13 +122,15 @@ public class ShapeSpawnSystem extends BaseSystem {
     }
 
     private int spawnRandomShape(float x, float y) {
-        int shapeIndex = random.nextInt(2);
+        int shapeIndex = random.nextInt(3);
 
         switch (shapeIndex) {
             case 0:
                 return spawnRandomCube(x, y);
             case 1:
                 return spawnRandomCircle(x, y);
+            case 2:
+                return spawnRandomTriangle(x, y);
         }
 
         return -1;
@@ -188,5 +191,58 @@ public class ShapeSpawnSystem extends BaseSystem {
         worldTransformationManager.setWorldPosition(circle, x, y);
 
         return circle;
+    }
+
+    private final Vector2[] tmpTriangle = new Vector2[] {new Vector2(), new Vector2(), new Vector2()};
+
+    public int spawnRandomTriangle(float x, float y) {
+        float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE;
+        float maxX = Float.MIN_VALUE, maxY = Float.MIN_VALUE;
+        for (int i = 0; i < tmpTriangle.length; i++) {
+            Vector2 point = tmpTriangle[i];
+            point.set(MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat()),
+                    MathUtils.lerp(minSize.y,
+                            maxSize.y, random.nextFloat()));
+
+            minX = Math.min(point.x, minX);
+            maxX = Math.max(point.x, maxX);
+            minY = Math.min(point.y, minY);
+            maxY = Math.max(point.y, maxY);
+        }
+
+        float centerX = MathUtils.lerp(minX, maxX, 0.5f);
+        float centerY = MathUtils.lerp(minY, maxY, 0.5f);
+
+        for (int i = 0; i < tmpTriangle.length; i++) {
+            tmpTriangle[i].sub(centerX, centerY);
+        }
+
+        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+
+        return spawnTriangle(x, y, tmpTriangle, tmpColor);
+    }
+
+    public int spawnTriangle(float x, float y, Vector2[] points, Color color) {
+        int triangle = world.create();
+        EntityEdit edit = world.edit(triangle);
+        edit.create(Transform.class);
+
+        RenderTriangle renderTriangle = edit.create(RenderTriangle.class);
+        renderTriangle.color.set(color);
+
+        for (int i = 0; i < renderTriangle.points.length; i++)
+            renderTriangle.points[i].set(points[i]);
+
+        for (int i = 0; i < points.length; i++)
+            points[i].scl(collisionSystem.getMetersPerPixel());
+
+        Body body = collisionSystem.createBody(triangle, bodyDef);
+        PolygonShape shape = new PolygonShape();
+        shape.set(points);
+        body.createFixture(shape, 2);
+
+        worldTransformationManager.setWorldPosition(triangle, x, y);
+        
+        return triangle;
     }
 }

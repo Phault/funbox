@@ -18,6 +18,7 @@
 	<extend-configuration-property name="artemis.reflect.include" value="com.mygdx.game.hierarchy"/>
 	<extend-configuration-property name="artemis.reflect.include" value="com.mygdx.game.scenegraph"/>
 	<extend-configuration-property name="artemis.reflect.include" value="com.mygdx.game.box2d"/>
+	<extend-configuration-property name="artemis.reflect.include" value="com.mygdx.game.shaperendering"/>
 
 	<inherits name='MyGdxGame' />
 	<entry-point class='com.mygdx.game.client.HtmlLauncher' />

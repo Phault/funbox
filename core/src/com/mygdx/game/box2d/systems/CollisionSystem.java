@@ -149,7 +149,7 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         return fixture;
     }
 
-    private Body getAttachedBody(int entityId) {
+    public Body getAttachedBody(int entityId) {
         int rigidbodyId = hierarchyManager.getEntityWithComponentInParent(entityId, Rigidbody.class);
 
         if (rigidbodyId != -1)

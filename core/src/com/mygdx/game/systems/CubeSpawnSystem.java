@@ -3,6 +3,7 @@ package com.mygdx.game.systems;
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.mygdx.game.box2d.components.Rigidbody;
 import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.components.Sprite;
 import com.mygdx.game.components.TestMovement;
@@ -51,20 +53,20 @@ public class CubeSpawnSystem extends BaseSystem {
     private final Vector3 worldPointer = new Vector3();
     private final Vector2 physicsWorldPointer = new Vector2();
     private final Color tmpColor = new Color();
-    private Body draggedBody;
+    private Body hitBody;
     private MouseJoint joint;
 
     private Body groundBody;
 
     private boolean isDragging() {
-        return draggedBody != null;
+        return joint != null;
     }
 
     private QueryCallback callback = new QueryCallback() {
         @Override
         public boolean reportFixture(Fixture fixture) {
             if (fixture.testPoint(physicsWorldPointer.x, physicsWorldPointer.y)) {
-                draggedBody = fixture.getBody();
+                hitBody = fixture.getBody();
                 return false;
             }
 
@@ -85,16 +87,19 @@ public class CubeSpawnSystem extends BaseSystem {
                 joint.setTarget(physicsWorldPointer);
             }
             else {
+                hitBody = null;
                 collisionSystem.getPhysicsWorld().QueryAABB(callback,
                         physicsWorldPointer.x - 0.01f,
                         physicsWorldPointer.y - 0.01f,
                         physicsWorldPointer.x + 0.01f,
                         physicsWorldPointer.y + 0.01f);
 
-                if (draggedBody != null)
-                    startDrag(draggedBody);
-                else if (Gdx.input.justTouched())
-                    spawnRandomCube(worldPointer.x, worldPointer.y);
+                if (hitBody != null)
+                    startDrag(hitBody);
+                else if (Gdx.input.justTouched()) {
+                    int cubeId = spawnRandomCube(worldPointer.x, worldPointer.y);
+                    startDrag(collisionSystem.getAttachedBody(cubeId));
+                }
             }
         }
         else {
@@ -118,7 +123,6 @@ public class CubeSpawnSystem extends BaseSystem {
     private void endDrag() {
         collisionSystem.getPhysicsWorld().destroyJoint(joint);
         joint = null;
-        draggedBody = null;
     }
 
     private int spawnRandomCube(float x, float y) {
@@ -140,7 +144,7 @@ public class CubeSpawnSystem extends BaseSystem {
         PolygonShape boxShape = new PolygonShape();
         boxShape.setAsBox(width * 0.5f * collisionSystem.getMetersPerPixel(),
                 height * 0.5f * collisionSystem.getMetersPerPixel());
-        boxBody.createFixture(boxShape, 1);
+        boxBody.createFixture(boxShape, 2);
 
         Sprite sprite = edit.create(Sprite.class);
         sprite.texture = new TextureRegion(img);

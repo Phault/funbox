@@ -3,29 +3,26 @@ package com.mygdx.game.systems;
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
-import com.mygdx.game.box2d.components.Rigidbody;
 import com.mygdx.game.box2d.systems.CollisionSystem;
-import com.mygdx.game.components.Sprite;
-import com.mygdx.game.components.TestMovement;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
+import com.mygdx.game.shaperendering.components.*;
 
 import java.util.Random;
 
 /**
  * Created by Casper on 06-09-2016.
  */
-public class CubeSpawnSystem extends BaseSystem {
+public class ShapeSpawnSystem extends BaseSystem {
 
     private CollisionSystem collisionSystem;
     private WorldTransformationManager worldTransformationManager;
@@ -33,16 +30,14 @@ public class CubeSpawnSystem extends BaseSystem {
 
     private Vector2 minSize = new Vector2(25, 25), maxSize = new Vector2(200, 200);
 
+    private float minRadius = 10, maxRadius = 100;
+
     private Random random = new Random();
     private BodyDef bodyDef;
-
-    private Texture img;
 
     @Override
     protected void initialize() {
         super.initialize();
-
-        img = new Texture("square.png");
 
         bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -97,7 +92,7 @@ public class CubeSpawnSystem extends BaseSystem {
                 if (hitBody != null)
                     startDrag(hitBody);
                 else if (Gdx.input.justTouched()) {
-                    int cubeId = spawnRandomCube(worldPointer.x, worldPointer.y);
+                    int cubeId = spawnRandomShape(worldPointer.x, worldPointer.y);
                     startDrag(collisionSystem.getAttachedBody(cubeId));
                 }
             }
@@ -125,6 +120,19 @@ public class CubeSpawnSystem extends BaseSystem {
         joint = null;
     }
 
+    private int spawnRandomShape(float x, float y) {
+        int shapeIndex = random.nextInt(2);
+
+        switch (shapeIndex) {
+            case 0:
+                return spawnRandomCube(x, y);
+            case 1:
+                return spawnRandomCircle(x, y);
+        }
+
+        return -1;
+    }
+
     private int spawnRandomCube(float x, float y) {
         float width = MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat());
         float height = MathUtils.lerp(minSize.y, maxSize.y, random.nextFloat());
@@ -134,11 +142,18 @@ public class CubeSpawnSystem extends BaseSystem {
         return spawnCube(worldPointer.x, worldPointer.y, width, height, tmpColor);
     }
 
+    private int spawnRandomCircle(float x, float y) {
+        float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat());
+
+        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+
+        return spawnCircle(worldPointer.x, worldPointer.y, radius, tmpColor);
+    }
+
     public int spawnCube(float x, float y, float width, float height, Color color) {
         int cube = world.create();
         EntityEdit edit = world.edit(cube);
         edit.create(Transform.class);
-        edit.create(TestMovement.class);
 
         Body boxBody = collisionSystem.createBody(cube, bodyDef);
         PolygonShape boxShape = new PolygonShape();
@@ -146,23 +161,32 @@ public class CubeSpawnSystem extends BaseSystem {
                 height * 0.5f * collisionSystem.getMetersPerPixel());
         boxBody.createFixture(boxShape, 2);
 
-        Sprite sprite = edit.create(Sprite.class);
-        sprite.texture = new TextureRegion(img);
-        sprite.tint.set(color);
+        RenderRectangle rectangle = edit.create(RenderRectangle.class);
+        rectangle.width = width;
+        rectangle.height = height;
+        rectangle.color.set(color);
 
-        float scaleX = width / sprite.texture.getRegionWidth();
-        float scaleY = height / sprite.texture.getRegionHeight();
-
-        worldTransformationManager.setLocalScale(cube, scaleX, scaleY);
         worldTransformationManager.setWorldPosition(cube, x, y);
 
         return cube;
     }
 
-    @Override
-    protected void dispose() {
-        super.dispose();
+    public int spawnCircle(float x, float y, float radius, Color color) {
+        int circle = world.create();
+        EntityEdit edit = world.edit(circle);
+        edit.create(Transform.class);
 
-        img.dispose();
+        Body body = collisionSystem.createBody(circle, bodyDef);
+        CircleShape circleShape = new CircleShape();
+        circleShape.setRadius(radius * collisionSystem.getMetersPerPixel());
+        body.createFixture(circleShape, 2);
+
+        RenderCircle renderCircle = edit.create(RenderCircle.class);
+        renderCircle.radius = radius;
+        renderCircle.color.set(color);
+
+        worldTransformationManager.setWorldPosition(circle, x, y);
+
+        return circle;
     }
 }

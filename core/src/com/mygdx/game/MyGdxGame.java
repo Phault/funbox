@@ -14,8 +14,9 @@ import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
+import com.mygdx.game.shaperendering.systems.ShapeRenderSystem;
 import com.mygdx.game.systems.CameraSystem;
-import com.mygdx.game.systems.CubeSpawnSystem;
+import com.mygdx.game.systems.ShapeSpawnSystem;
 import com.mygdx.game.systems.RenderSystem;
 import com.mygdx.game.systems.TestMovementSystem;
 
@@ -32,9 +33,10 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new HierarchyManager())
                 .with(worldTransformationManager)
                 .with(collisionSystem)
-                .with(new CubeSpawnSystem())
+                .with(new ShapeSpawnSystem())
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())
+                .with(new ShapeRenderSystem())
                 .with(new RenderSystem());
 
         if (isDebugging())

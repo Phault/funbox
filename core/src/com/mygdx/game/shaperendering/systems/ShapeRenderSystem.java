@@ -1,15 +1,12 @@
 package com.mygdx.game.shaperendering.systems;
 
-import com.artemis.*;
+import com.artemis.Aspect;
+import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
-import com.mygdx.game.shaperendering.components.RenderCircle;
-import com.mygdx.game.shaperendering.components.RenderRectangle;
-import com.mygdx.game.shaperendering.components.RenderShape;
-import com.mygdx.game.shaperendering.components.RenderTriangle;
+import com.mygdx.game.shaperendering.components.*;
 import com.mygdx.game.systems.CameraSystem;
 
 /**
@@ -20,35 +17,38 @@ public class ShapeRenderSystem extends IteratingSystem {
     private ComponentMapper<RenderRectangle> mRectangles;
     private ComponentMapper<RenderCircle> mCircles;
     private ComponentMapper<RenderTriangle> mTriangles;
+    private ComponentMapper<RenderPolygon> mPolygons;
 
     private CameraSystem cameraSystem;
     private WorldTransformationManager transformManager;
 
-    private final Vector2 position = new Vector2();
-    private final Vector2 scale = new Vector2();
-    private float degrees = 0;
-    private int currentEntityId = -1;
-
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     public ShapeRenderSystem() {
-        super(Aspect.all(Transform.class).one(RenderCircle.class, RenderRectangle.class, RenderTriangle.class));
+        super(Aspect.all(Transform.class)
+                .one(
+                        RenderCircle.class,
+                        RenderRectangle.class,
+                        RenderTriangle.class,
+                        RenderPolygon.class
+                ));
     }
 
     @Override
     protected void begin() {
         super.begin();
 
+        shapeRenderer.setAutoShapeType(true);
         shapeRenderer.setProjectionMatrix(cameraSystem.getMatrix());
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.begin();
     }
 
     @Override
     protected void process(int entityId) {
-        transformManager.getWorldPosition(entityId, position);
-        transformManager.getWorldScale(entityId, scale);
-        degrees = transformManager.getWorldRotation(entityId);
-        currentEntityId = entityId;
+        shapeRenderer.getTransformMatrix().set(transformManager.getLocalToWorldMatrix(entityId));
+        shapeRenderer.updateMatrices();
+
+        shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
 
         RenderShape shape = mRectangles.get(entityId);
         if (shape != null)
@@ -61,6 +61,15 @@ public class ShapeRenderSystem extends IteratingSystem {
         shape = mTriangles.get(entityId);
         if (shape != null)
             renderTriangle((RenderTriangle) shape);
+
+
+        shape = mPolygons.get(entityId);
+        if (shape != null) {
+            shapeRenderer.set(ShapeRenderer.ShapeType.Line);
+            renderPolygon((RenderPolygon) shape);
+        }
+
+        shapeRenderer.identity();
     }
 
     private void renderRectangle(RenderRectangle rectangle) {
@@ -68,42 +77,31 @@ public class ShapeRenderSystem extends IteratingSystem {
         float originY = rectangle.origin.y * rectangle.height;
 
         shapeRenderer.setColor(rectangle.color);
-        shapeRenderer.rect(position.x - originX,
-                position.y - originY,
-                originX,
-                originY,
+        shapeRenderer.rect(-originX,
+                -originY,
                 rectangle.width,
-                rectangle.height,
-                scale.x,
-                scale.y,
-                degrees);
+                rectangle.height);
     }
 
     private void renderCircle(RenderCircle circle) {
-        float width = circle.radius * 2 * scale.x;
-        float height = circle.radius * 2 * scale.y;
-
-        float originX = circle.origin.x * width;
-        float originY = circle.origin.y * height;
+        float diameter = circle.radius * 2;
+        float originX = (-0.5f + circle.origin.x) * diameter;
+        float originY = (-0.5f + circle.origin.y) * diameter;
 
         shapeRenderer.setColor(circle.color);
-        shapeRenderer.ellipse(position.x - originX,
-                position.y - originY,
-                width,
-                height,
-                degrees);
+        shapeRenderer.circle(originX, originY, circle.radius);
     }
 
     private void renderTriangle(RenderTriangle triangle) {
-        shapeRenderer.getTransformMatrix().set(transformManager.getLocalToWorldMatrix(currentEntityId));
-        shapeRenderer.updateMatrices();
-
         shapeRenderer.setColor(triangle.color);
         shapeRenderer.triangle(triangle.points[0].x, triangle.points[0].y,
                 triangle.points[1].x, triangle.points[1].y,
                 triangle.points[2].x, triangle.points[2].y);
+    }
 
-        shapeRenderer.identity();
+    private void renderPolygon(RenderPolygon polygon) {
+        shapeRenderer.setColor(polygon.color);
+        shapeRenderer.polygon(polygon.vertices.getBackingArray());
     }
 
     @Override

@@ -15,6 +15,7 @@ import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 import com.mygdx.game.shaperendering.components.*;
+import com.mygdx.game.shaperendering.utils.VertexArray;
 
 import java.util.Random;
 
@@ -123,7 +124,7 @@ public class ShapeSpawnSystem extends BaseSystem {
     }
 
     private int spawnRandomShape(float x, float y) {
-        int shapeIndex = random.nextInt(3);
+        int shapeIndex = random.nextInt(4);
 
         switch (shapeIndex) {
             case 0:
@@ -132,26 +133,34 @@ public class ShapeSpawnSystem extends BaseSystem {
                 return spawnRandomCircle(x, y);
             case 2:
                 return spawnRandomTriangle(x, y);
+            case 3:
+                return spawnRandomNGon(x, y);
         }
 
         return -1;
+    }
+
+    private int spawnRandomNGon(float x, float y) {
+        int sides = 5 + random.nextInt(4);
+        float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat());
+        return spawnNGon(x, y, sides, radius, getRandomColor());
     }
 
     private int spawnRandomCube(float x, float y) {
         float width = MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat());
         float height = MathUtils.lerp(minSize.y, maxSize.y, random.nextFloat());
 
-        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
-
-        return spawnCube(worldPointer.x, worldPointer.y, width, height, tmpColor);
+        return spawnCube(x, y, width, height, getRandomColor());
     }
 
     private int spawnRandomCircle(float x, float y) {
         float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat());
+        return spawnCircle(x, y, radius, getRandomColor());
+    }
 
-        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
-
-        return spawnCircle(worldPointer.x, worldPointer.y, radius, tmpColor);
+    public int spawnRandomTriangle(float x, float y) {
+        Vector2[] triangle = generateTriangle(minSize.x, maxSize.x);
+        return spawnTriangle(x, y, triangle, getRandomColor());
     }
 
     public int spawnCube(float x, float y, float width, float height, Color color) {
@@ -194,24 +203,17 @@ public class ShapeSpawnSystem extends BaseSystem {
         return circle;
     }
 
-    public int spawnRandomTriangle(float x, float y) {
-        Vector2[] triangle = generateTriangle(minSize.x, maxSize.x);
-        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
-
-        return spawnTriangle(x, y, triangle, tmpColor);
-    }
-
     private final Vector2[] genTriangle = new Vector2[] { new Vector2(), new Vector2(), new Vector2()};
     private Vector2[] generateTriangle(float minEdgeLength, float maxEdgeLength) {
-        float firstAngle = (float) Math.PI * 2 * random.nextFloat();
-        float secondAngle = firstAngle + MathUtils.lerp(minTriangleAngle, maxTriangleAngle, random.nextFloat()) * MathUtils.degreesToRadians;
+        float firstAngle = 360f * random.nextFloat();
+        float secondAngle = firstAngle + MathUtils.lerp(minTriangleAngle, maxTriangleAngle, random.nextFloat());
 
         float firstLength = MathUtils.lerp(minEdgeLength, maxEdgeLength, random.nextFloat());
         float secondLength = MathUtils.lerp(minEdgeLength, maxEdgeLength, random.nextFloat());
 
         genTriangle[0].set(0, 0);
-        genTriangle[1].set(MathUtils.cos(firstAngle), MathUtils.sin(firstAngle)).scl(firstLength);
-        genTriangle[2].set(MathUtils.cos(secondAngle), MathUtils.sin(secondAngle)).scl(secondLength);
+        genTriangle[1].set(MathUtils.cosDeg(firstAngle), MathUtils.sinDeg(firstAngle)).scl(firstLength);
+        genTriangle[2].set(MathUtils.cosDeg(secondAngle), MathUtils.sinDeg(secondAngle)).scl(secondLength);
 
         centerPolygon(genTriangle);
 
@@ -257,5 +259,52 @@ public class ShapeSpawnSystem extends BaseSystem {
         worldTransformationManager.setWorldPosition(triangle, x, y);
         
         return triangle;
+    }
+
+    private VertexArray generateNGon(int sides, float radius) {
+        sides = MathUtils.clamp(sides, 3, 8);
+
+        VertexArray vertices = new VertexArray(sides);
+        float degreesPerSide = 360f / sides;
+
+        for (int i = 0; i < vertices.size(); i++) {
+            float degrees = i * degreesPerSide;
+            float x = MathUtils.cosDeg(degrees) * radius;
+            float y = MathUtils.sinDeg(degrees) * radius;
+            vertices.set(i, x, y);
+        }
+
+        return vertices;
+    }
+
+    private float[] tmpNGon = new float[8 * 2];
+
+    public int spawnNGon(float x, float y, int sides, float radius, Color color) {
+        int nGon = world.create();
+        EntityEdit edit = world.edit(nGon);
+        edit.create(Transform.class);
+
+        RenderPolygon renderPolygon = edit.create(RenderPolygon.class);
+        renderPolygon.color.set(color);
+        renderPolygon.vertices = generateNGon(sides, radius);
+
+        float[] backingArray = renderPolygon.vertices.getBackingArray();
+        for (int i = 0; i < backingArray.length; i++)
+            tmpNGon[i] = backingArray[i] * collisionSystem.getMetersPerPixel();
+
+        Body body = collisionSystem.createBody(nGon, bodyDef);
+        PolygonShape shape = new PolygonShape();
+
+        shape.set(tmpNGon, 0, backingArray.length);
+        body.createFixture(shape, 2);
+
+        worldTransformationManager.setWorldPosition(nGon, x, y);
+
+        return nGon;
+    }
+
+    public Color getRandomColor() {
+        tmpColor.set(random.nextFloat(), random.nextFloat(), random.nextFloat(), 1);
+        return tmpColor;
     }
 }

@@ -52,24 +52,6 @@ public class MyGdxGame extends ApplicationAdapter {
         EdgeShape groundShape = new EdgeShape();
         groundShape.set(-100, 0, 100, 0);
         collisionSystem.createFixture(ground, groundShape, 1);
-
-//        int parent = world.create();
-//        world.edit(parent).create(TestMovement.class);
-//        world.edit(parent).create(Velocity.class);
-//        world.edit(parent).create(Sprite.class).texture = new TextureRegion(img);
-//        Transform parentTransform = world.edit(parent).create(Transform.class);
-//        parentTransform.position.set(200, 0);
-//        parentTransform.rotation = 45;
-//        parentTransform.scale.set(0.5f, 1);
-//
-//        int child = world.create();
-//        world.edit(child).create(Sprite.class).texture = new TextureRegion(img);
-//        Transform childTransform = world.edit(child).create(Transform.class);
-//        childTransform.position.set(150, 50);
-//        childTransform.rotation = -45;
-//        childTransform.scale.set(2, 1);
-//        world.edit(child).create(Parented.class).target = parent;
-//        world.edit(child).create(Velocity.class).y = 10;
     }
 
     public static boolean isDebugging() {

@@ -290,7 +290,7 @@ public class ShapeSpawnSystem extends BaseSystem {
         return vertices;
     }
 
-    private float[] tmpNGon = new float[8 * 2];
+    private final float[] tmpTriangle = new float[6];
 
     public int spawnNGon(float x, float y, int sides, float radius, Color color) {
         int nGon = world.create();
@@ -303,13 +303,21 @@ public class ShapeSpawnSystem extends BaseSystem {
         ShortArray tmpTriangulation = triangulator.computeTriangles(renderPolygon.vertices.getBackingArray());
         renderPolygon.triangulation.addAll(tmpTriangulation);
 
-        float[] backingArray = renderPolygon.vertices.getBackingArray();
-        for (int i = 0; i < backingArray.length; i++)
-            tmpNGon[i] = backingArray[i] * collisionSystem.getMetersPerPixel();
-
+        // sure.. this is totally readable
         Body body = collisionSystem.createBody(nGon, bodyDef);
-        polygonShape.set(tmpNGon, 0, backingArray.length);
-        body.createFixture(polygonShape, 2);
+        for (int i = 0; i < tmpTriangulation.size; i += 3) {
+            for (int j = 0; j < 3; j++) {
+                int polygonVertex = tmpTriangulation.get(i+j);
+                float scaledX = collisionSystem.getMetersPerPixel() * renderPolygon.vertices.getX(polygonVertex);
+                float scaledY = collisionSystem.getMetersPerPixel() * renderPolygon.vertices.getY(polygonVertex);
+
+                int triangleVertex = j*2;
+                tmpTriangle[triangleVertex] = scaledX;
+                tmpTriangle[triangleVertex+1] = scaledY;
+            }
+            polygonShape.set(tmpTriangle);
+            body.createFixture(polygonShape, 2);
+        }
 
         worldTransformationManager.setWorldPosition(nGon, x, y);
 

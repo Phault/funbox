@@ -21,6 +21,8 @@ import com.mygdx.game.systems.RenderSystem;
 import com.mygdx.game.systems.TestMovementSystem;
 
 public class MyGdxGame extends ApplicationAdapter {
+    public final boolean isDebugging = false;
+
     private World world;
 
     private CollisionSystem collisionSystem = new CollisionSystem();
@@ -39,7 +41,7 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new ShapeRenderSystem())
                 .with(new RenderSystem());
 
-        if (isDebugging())
+        if (isDebugging)
             builder.with(new Box2DDebugRenderSystem());
 
         WorldConfiguration config = builder.build();
@@ -52,10 +54,6 @@ public class MyGdxGame extends ApplicationAdapter {
         EdgeShape groundShape = new EdgeShape();
         groundShape.set(-100, 0, 100, 0);
         collisionSystem.createFixture(ground, groundShape, 1);
-    }
-
-    public static boolean isDebugging() {
-        return false;
     }
 
     @Override

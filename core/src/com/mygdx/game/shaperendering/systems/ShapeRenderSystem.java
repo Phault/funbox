@@ -4,9 +4,12 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ShortArray;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 import com.mygdx.game.shaperendering.components.*;
+import com.mygdx.game.shaperendering.utils.VertexArray;
 import com.mygdx.game.systems.CameraSystem;
 
 /**
@@ -38,17 +41,14 @@ public class ShapeRenderSystem extends IteratingSystem {
     protected void begin() {
         super.begin();
 
-        shapeRenderer.setAutoShapeType(true);
         shapeRenderer.setProjectionMatrix(cameraSystem.getMatrix());
-        shapeRenderer.begin();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
     }
 
     @Override
     protected void process(int entityId) {
         shapeRenderer.getTransformMatrix().set(transformManager.getLocalToWorldMatrix(entityId));
         shapeRenderer.updateMatrices();
-
-        shapeRenderer.set(ShapeRenderer.ShapeType.Filled);
 
         RenderShape shape = mRectangles.get(entityId);
         if (shape != null)
@@ -64,10 +64,8 @@ public class ShapeRenderSystem extends IteratingSystem {
 
 
         shape = mPolygons.get(entityId);
-        if (shape != null) {
-            shapeRenderer.set(ShapeRenderer.ShapeType.Line);
+        if (shape != null)
             renderPolygon((RenderPolygon) shape);
-        }
 
         shapeRenderer.identity();
     }
@@ -99,9 +97,26 @@ public class ShapeRenderSystem extends IteratingSystem {
                 triangle.points[2].x, triangle.points[2].y);
     }
 
+    private final Vector2[] tmpTriangle = new Vector2[] {
+            new Vector2(),
+            new Vector2(),
+            new Vector2(),
+    };
+
     private void renderPolygon(RenderPolygon polygon) {
         shapeRenderer.setColor(polygon.color);
-        shapeRenderer.polygon(polygon.vertices.getBackingArray());
+
+        VertexArray vertices = polygon.vertices;
+        ShortArray triangulation = polygon.triangulation;
+
+        for (int i = 0; i < triangulation.size; i += 3) {
+            vertices.get(triangulation.get(i), tmpTriangle[0]);
+            vertices.get(triangulation.get(i + 1), tmpTriangle[1]);
+            vertices.get(triangulation.get(i + 2), tmpTriangle[2]);
+            shapeRenderer.triangle(tmpTriangle[0].x, tmpTriangle[0].y,
+                    tmpTriangle[1].x, tmpTriangle[1].y,
+                    tmpTriangle[2].x, tmpTriangle[2].y);
+        }
     }
 
     @Override

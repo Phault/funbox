@@ -4,6 +4,7 @@ import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.utils.ShortArray;
 import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
@@ -35,8 +37,9 @@ public class ShapeSpawnSystem extends BaseSystem {
 
     private float minRadius = 10, maxRadius = 100;
 
-    private Random random = new Random();
+    private final Random random = new Random();
     private BodyDef bodyDef;
+    private final EarClippingTriangulator triangulator = new EarClippingTriangulator();
 
     @Override
     protected void initialize() {
@@ -287,6 +290,8 @@ public class ShapeSpawnSystem extends BaseSystem {
         RenderPolygon renderPolygon = edit.create(RenderPolygon.class);
         renderPolygon.color.set(color);
         renderPolygon.vertices = generateNGon(sides, radius);
+        ShortArray tmpTriangulation = triangulator.computeTriangles(renderPolygon.vertices.getBackingArray());
+        renderPolygon.triangulation.addAll(tmpTriangulation);
 
         float[] backingArray = renderPolygon.vertices.getBackingArray();
         for (int i = 0; i < backingArray.length; i++)

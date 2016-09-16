@@ -33,7 +33,6 @@ public class ShapeSpawnSystem extends BaseSystem {
     private Vector2 minSize = new Vector2(25, 25), maxSize = new Vector2(200, 200);
 
     private float minTriangleAngle = 30, maxTriangleAngle = 150;
-    private float minTriangleLength = 25, maxTriangleLength = 200;
 
     private float minRadius = 10, maxRadius = 100;
 

@@ -11,6 +11,7 @@
     <!-- Why is this needed? -->
     <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.physics.box2d.Body"/>
     <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.physics.box2d.Fixture"/>
+    <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.utils.ShortArray"/>
 
     <extend-configuration-property name="artemis.reflect.include" value="com.mygdx.game.components"/>
 	<extend-configuration-property name="artemis.reflect.include" value="com.mygdx.game.systems"/>

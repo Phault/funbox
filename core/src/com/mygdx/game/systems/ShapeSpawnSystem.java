@@ -40,16 +40,6 @@ public class ShapeSpawnSystem extends BaseSystem {
     private BodyDef bodyDef;
     private final EarClippingTriangulator triangulator = new EarClippingTriangulator();
 
-    @Override
-    protected void initialize() {
-        super.initialize();
-
-        bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-
-        groundBody = collisionSystem.getPhysicsWorld().createBody(new BodyDef());
-    }
-
     private final Vector3 worldPointer = new Vector3();
     private final Vector2 physicsWorldPointer = new Vector2();
     private final Color tmpColor = new Color();
@@ -57,6 +47,8 @@ public class ShapeSpawnSystem extends BaseSystem {
     private MouseJoint joint;
 
     private Body groundBody;
+    private PolygonShape polygonShape;
+    private CircleShape circleShape;
 
     private boolean isDragging() {
         return joint != null;
@@ -73,6 +65,28 @@ public class ShapeSpawnSystem extends BaseSystem {
             return true;
         }
     };
+
+
+    @Override
+    protected void initialize() {
+        super.initialize();
+
+        bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+
+        groundBody = collisionSystem.getPhysicsWorld().createBody(new BodyDef());
+
+        circleShape = new CircleShape();
+        polygonShape = new PolygonShape();
+    }
+
+    @Override
+    protected void dispose() {
+        super.dispose();
+
+        circleShape.dispose();
+        polygonShape.dispose();
+    }
 
     @Override
     protected void processSystem() {
@@ -171,10 +185,9 @@ public class ShapeSpawnSystem extends BaseSystem {
         edit.create(Transform.class);
 
         Body boxBody = collisionSystem.createBody(cube, bodyDef);
-        PolygonShape boxShape = new PolygonShape();
-        boxShape.setAsBox(width * 0.5f * collisionSystem.getMetersPerPixel(),
+        polygonShape.setAsBox(width * 0.5f * collisionSystem.getMetersPerPixel(),
                 height * 0.5f * collisionSystem.getMetersPerPixel());
-        boxBody.createFixture(boxShape, 2);
+        boxBody.createFixture(polygonShape, 2);
 
         RenderRectangle rectangle = edit.create(RenderRectangle.class);
         rectangle.width = width;
@@ -192,7 +205,6 @@ public class ShapeSpawnSystem extends BaseSystem {
         edit.create(Transform.class);
 
         Body body = collisionSystem.createBody(circle, bodyDef);
-        CircleShape circleShape = new CircleShape();
         circleShape.setRadius(radius * collisionSystem.getMetersPerPixel());
         body.createFixture(circleShape, 2);
 
@@ -254,9 +266,8 @@ public class ShapeSpawnSystem extends BaseSystem {
             points[i].scl(collisionSystem.getMetersPerPixel());
 
         Body body = collisionSystem.createBody(triangle, bodyDef);
-        PolygonShape shape = new PolygonShape();
-        shape.set(points);
-        body.createFixture(shape, 2);
+        polygonShape.set(points);
+        body.createFixture(polygonShape, 2);
 
         worldTransformationManager.setWorldPosition(triangle, x, y);
         
@@ -297,10 +308,8 @@ public class ShapeSpawnSystem extends BaseSystem {
             tmpNGon[i] = backingArray[i] * collisionSystem.getMetersPerPixel();
 
         Body body = collisionSystem.createBody(nGon, bodyDef);
-        PolygonShape shape = new PolygonShape();
-
-        shape.set(tmpNGon, 0, backingArray.length);
-        body.createFixture(shape, 2);
+        polygonShape.set(tmpNGon, 0, backingArray.length);
+        body.createFixture(polygonShape, 2);
 
         worldTransformationManager.setWorldPosition(nGon, x, y);
 

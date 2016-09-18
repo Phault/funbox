@@ -3,6 +3,8 @@ package com.mygdx.game.systems;
 import com.artemis.BaseSystem;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 /**
  * Created by Casper on 24-07-2016.
@@ -32,5 +34,22 @@ public class CameraSystem extends BaseSystem {
 
     public OrthographicCamera getCamera() {
         return camera;
+    }
+
+    private final Vector3 tmpVector3 = new Vector3();
+    public Vector2 screenToWorld(int x, int y, Vector2 result) {
+        tmpVector3.set(x, y, 0);
+        camera.unproject(tmpVector3);
+
+        result.set(tmpVector3.x, tmpVector3.y);
+        return result;
+    }
+
+    public Vector2 worldToScreen(float x, float y, Vector2 result) {
+        tmpVector3.set(x, y, 0);
+        camera.project(tmpVector3);
+
+        result.set(tmpVector3.x, tmpVector3.y);
+        return result;
     }
 }

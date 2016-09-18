@@ -306,14 +306,14 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         }
     }
 
-    private int getEntityId(Fixture fixture) {
+    public int getEntityId(Fixture fixture) {
         if (fixture.getUserData() == null)
             return -1;
 
         return (Integer) fixture.getUserData();
     }
 
-    private int getEntityId(Body body) {
+    public int getEntityId(Body body) {
         if (body.getUserData() == null)
             return -1;
 
@@ -370,6 +370,35 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
 
         // todo: update fixture
         // todo: recreate fixture with new scale (if changed)
+    }
+
+
+    private Body hitBody;
+    private float pointQueryX, pointQueryY;
+    private QueryCallback pointQueryCallback = new QueryCallback() {
+        @Override
+        public boolean reportFixture(Fixture fixture) {
+            if (fixture.testPoint(pointQueryX, pointQueryY)) {
+                hitBody = fixture.getBody();
+                return false;
+            }
+
+            return true;
+        }
+    };
+
+    public Body queryPoint(float x, float y) {
+        hitBody = null;
+        pointQueryX = x;
+        pointQueryY = y;
+
+        physicsWorld.QueryAABB(pointQueryCallback,
+                x - 0.01f,
+                y - 0.01f,
+                x + 0.01f,
+                y + 0.01f);
+
+        return hitBody;
     }
 
     public interface CollisionListener {

@@ -15,10 +15,7 @@ import com.mygdx.game.hierarchy.systems.HierarchyManager;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
 import com.mygdx.game.shaperendering.systems.ShapeRenderSystem;
-import com.mygdx.game.systems.CameraSystem;
-import com.mygdx.game.systems.ShapeSpawnSystem;
-import com.mygdx.game.systems.RenderSystem;
-import com.mygdx.game.systems.TestMovementSystem;
+import com.mygdx.game.systems.*;
 
 public class MyGdxGame extends ApplicationAdapter {
     public final boolean isDebugging = false;
@@ -27,19 +24,24 @@ public class MyGdxGame extends ApplicationAdapter {
 
     private CollisionSystem collisionSystem = new CollisionSystem();
     private WorldTransformationManager worldTransformationManager = new WorldTransformationManager();
+    private InputSystem inputSystem = new InputSystem();
 
     @Override
 	public void create () {
         WorldConfigurationBuilder builder = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
+                .with(inputSystem)
                 .with(new HierarchyManager())
                 .with(worldTransformationManager)
                 .with(collisionSystem)
+                .with(new ShapeDragSystem())
                 .with(new ShapeSpawnSystem())
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())
                 .with(new ShapeRenderSystem())
                 .with(new RenderSystem());
+
+        Gdx.input.setInputProcessor(inputSystem);
 
         if (isDebugging)
             builder.with(new Box2DDebugRenderSystem());

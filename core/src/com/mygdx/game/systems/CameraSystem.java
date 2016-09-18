@@ -52,4 +52,12 @@ public class CameraSystem extends BaseSystem {
         result.set(tmpVector3.x, tmpVector3.y);
         return result;
     }
+
+    public void setZoom(float value) {
+        camera.zoom = value;
+    }
+
+    public float getZoom() {
+        return camera.zoom;
+    }
 }

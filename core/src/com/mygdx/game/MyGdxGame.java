@@ -38,6 +38,7 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new ShapeSpawnSystem())
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())
+                .with(new ZoomSystem())
                 .with(new ShapeRenderSystem())
                 .with(new RenderSystem());
 

@@ -7,6 +7,7 @@ import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.mygdx.game.box2d.systems.Box2DDebugRenderSystem;
@@ -18,19 +19,24 @@ import com.mygdx.game.shaperendering.systems.ShapeRenderSystem;
 import com.mygdx.game.systems.*;
 
 public class MyGdxGame extends ApplicationAdapter {
-    public final boolean isDebugging = false;
 
     private World world;
 
     private CollisionSystem collisionSystem = new CollisionSystem();
     private WorldTransformationManager worldTransformationManager = new WorldTransformationManager();
     private InputSystem inputSystem = new InputSystem();
+    private HotkeySystem hotkeySystem = new HotkeySystem();
+    private Box2DDebugRenderSystem box2DDebugRenderSystem;
 
     @Override
 	public void create () {
+
+        box2DDebugRenderSystem = new Box2DDebugRenderSystem();
+
         WorldConfigurationBuilder builder = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
                 .with(inputSystem)
+                .with(hotkeySystem)
                 .with(new HierarchyManager())
                 .with(worldTransformationManager)
                 .with(collisionSystem)
@@ -40,16 +46,23 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new CameraSystem())
                 .with(new ZoomSystem())
                 .with(new ShapeRenderSystem())
-                .with(new RenderSystem());
+                .with(new RenderSystem())
+                .with(box2DDebugRenderSystem);
 
         Gdx.input.setInputProcessor(inputSystem);
 
-        if (isDebugging)
-            builder.with(new Box2DDebugRenderSystem());
+        hotkeySystem.addListener(Input.Keys.D, HotkeySystem.Modifiers.CTRL, new HotkeySystem.HotkeyListener() {
+            @Override
+            public boolean execute() {
+                box2DDebugRenderSystem.setEnabled(!box2DDebugRenderSystem.isEnabled());
+                return true;
+            }
+        });
 
         WorldConfiguration config = builder.build();
 
         world = new World(config);
+        box2DDebugRenderSystem.setEnabled(false);
 
         int ground = world.create();
         EntityEdit edit = world.edit(ground);

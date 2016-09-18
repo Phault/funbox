@@ -51,7 +51,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
         Gdx.input.setInputProcessor(inputSystem);
 
-        hotkeySystem.addListener(Input.Keys.D, HotkeySystem.Modifiers.CTRL, new HotkeySystem.HotkeyListener() {
+        hotkeySystem.addListener(Input.Keys.D, HotkeySystem.Modifiers.NONE, new HotkeySystem.HotkeyListener() {
             @Override
             public boolean execute() {
                 box2DDebugRenderSystem.setEnabled(!box2DDebugRenderSystem.isEnabled());

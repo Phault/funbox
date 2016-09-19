@@ -1,0 +1,10 @@
+*/bin
+*/release
+*.so
+*.log
+*.class
+*/.ant*
+target/
+.project
+.settings
+.classpath

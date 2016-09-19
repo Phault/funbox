@@ -5,11 +5,15 @@ import com.artemis.World;
 import com.artemis.WorldConfiguration;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.link.EntityLinkManager;
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
+import com.bitfire.postprocessing.PostProcessor;
+import com.bitfire.postprocessing.effects.Antialiasing;
+import com.bitfire.postprocessing.effects.Fxaa;
+import com.bitfire.utils.ShaderLoader;
 import com.mygdx.game.box2d.systems.Box2DDebugRenderSystem;
 import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
@@ -27,6 +31,8 @@ public class MyGdxGame extends ApplicationAdapter {
     private InputSystem inputSystem = new InputSystem();
     private HotkeySystem hotkeySystem = new HotkeySystem();
     private Box2DDebugRenderSystem box2DDebugRenderSystem;
+
+    private PostProcessor postProcessor;
 
     @Override
 	public void create () {
@@ -70,6 +76,21 @@ public class MyGdxGame extends ApplicationAdapter {
         EdgeShape groundShape = new EdgeShape();
         groundShape.set(-100, 0, 100, 0);
         collisionSystem.createFixture(ground, groundShape, 1);
+
+        boolean isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
+        ShaderLoader.BasePath = "shaders/";
+        postProcessor = new PostProcessor(false, false, isDesktop);
+
+        Antialiasing antialiasing = new Fxaa(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        postProcessor.addEffect(antialiasing);
+
+        hotkeySystem.addListener(Input.Keys.A, HotkeySystem.Modifiers.NONE, new HotkeySystem.HotkeyListener() {
+            @Override
+            public boolean execute() {
+                postProcessor.setEnabled(!postProcessor.isEnabled());
+                return true;
+            }
+        });
     }
 
     @Override
@@ -79,16 +100,24 @@ public class MyGdxGame extends ApplicationAdapter {
     }
 
     @Override
+    public void resume() {
+        super.resume();
+        postProcessor.rebind();
+    }
+
+    @Override
 	public void render () {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        postProcessor.capture();
 
         world.setDelta(Gdx.graphics.getDeltaTime());
         world.process();
+
+        postProcessor.render();
 	}
 	
 	@Override
 	public void dispose () {
         world.dispose();
+        postProcessor.dispose();
 	}
 }

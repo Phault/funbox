@@ -114,6 +114,8 @@ project(":core") {
     }
 
     dependencies {
+        compile project(":postprocessing")
+
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
 
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"

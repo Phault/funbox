@@ -1,1 +1,3 @@
-include 'desktop', 'android', 'html', 'matrix', 'core'
+include 'desktop', 'android', 'html', 'matrix', 'core', 'postprocessing-demo', 'postprocessing', 'utils'
+project(':postprocessing').projectDir = new File('libgdx-contribs/postprocessing')
+project(':utils').projectDir = new File('libgdx-contribs/utils')

@@ -7,6 +7,7 @@
     <inherits name='com.artemis-json-libgdx'/>
     <inherits name='com.badlogic.gdx.backends.gdx_backends_gwt' />
     <inherits name='com.badlogic.gdx.physics.box2d.box2d-gwt' />
+    <inherits name='postprocessing' />
 
     <!-- Why is this needed? -->
     <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.physics.box2d.Body"/>

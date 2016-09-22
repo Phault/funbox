@@ -9,11 +9,13 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.bitfire.postprocessing.PostProcessor;
 import com.bitfire.postprocessing.effects.Antialiasing;
 import com.bitfire.postprocessing.effects.Fxaa;
 import com.bitfire.utils.ShaderLoader;
+import com.kotcrab.vis.ui.VisUI;
 import com.mygdx.game.box2d.systems.Box2DDebugRenderSystem;
 import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
@@ -31,11 +33,18 @@ public class MyGdxGame extends ApplicationAdapter {
     private InputSystem inputSystem = new InputSystem();
     private HotkeySystem hotkeySystem = new HotkeySystem();
     private Box2DDebugRenderSystem box2DDebugRenderSystem;
+    private ShapeSpawnSystem shapeSpawnSystem = new ShapeSpawnSystem();
 
     private PostProcessor postProcessor;
 
+    private UIStage uiStage;
+
     @Override
 	public void create () {
+
+        VisUI.load(VisUI.SkinScale.X2);
+        uiStage = new UIStage(this);
+        inputSystem.addProcessor(uiStage);
 
         box2DDebugRenderSystem = new Box2DDebugRenderSystem();
 
@@ -47,7 +56,7 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(worldTransformationManager)
                 .with(collisionSystem)
                 .with(new ShapeDragSystem())
-                .with(new ShapeSpawnSystem())
+                .with(shapeSpawnSystem)
                 .with(new TestMovementSystem())
                 .with(new CameraSystem())
                 .with(new ZoomSystem())
@@ -97,6 +106,7 @@ public class MyGdxGame extends ApplicationAdapter {
     public void resize(int width, int height) {
         super.resize(width, height);
         world.getSystem(CameraSystem.class).resize(width, height);
+        uiStage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -107,17 +117,29 @@ public class MyGdxGame extends ApplicationAdapter {
 
     @Override
 	public void render () {
+        Gdx.gl20.glClearColor(0,0,0,1);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         postProcessor.capture();
 
         world.setDelta(Gdx.graphics.getDeltaTime());
         world.process();
 
         postProcessor.render();
+
+        uiStage.act(Gdx.graphics.getDeltaTime());
+        uiStage.draw();
 	}
 	
 	@Override
 	public void dispose () {
         world.dispose();
         postProcessor.dispose();
+        uiStage.dispose();
+        VisUI.dispose();
 	}
+
+    public ShapeSpawnSystem getShapeSpawnSystem() {
+        return shapeSpawnSystem;
+    }
 }

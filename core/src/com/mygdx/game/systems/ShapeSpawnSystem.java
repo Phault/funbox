@@ -47,6 +47,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private PolygonShape polygonShape;
     private CircleShape circleShape;
 
+    private ShapeType activeType = ShapeType.Random;
 
     @Override
     protected void initialize() {
@@ -79,21 +80,32 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     }
 
-    private int spawnRandomShape(float x, float y) {
-        int shapeIndex = random.nextInt(4);
+    public ShapeType getActiveType() {
+        return activeType;
+    }
 
-        switch (shapeIndex) {
-            case 0:
+    public void setActiveType(ShapeType activeType) {
+        this.activeType = activeType;
+    }
+
+    private int spawnRandomShape(float x, float y) {
+        ShapeType type = ShapeType.values()[1 + random.nextInt(ShapeType.values().length - 1)];
+        return spawnShape(type, x, y);
+    }
+
+    private int spawnShape(ShapeType type, float x, float y) {
+        switch (type) {
+            case Cube:
                 return spawnRandomCube(x, y);
-            case 1:
+            case Circle:
                 return spawnRandomCircle(x, y);
-            case 2:
+            case Triangle:
                 return spawnRandomTriangle(x, y);
-            case 3:
+            case NGon:
                 return spawnRandomNGon(x, y);
         }
 
-        return -1;
+        return spawnRandomShape(x, y);
     }
 
     private int spawnRandomNGon(float x, float y) {
@@ -160,6 +172,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     }
 
     private final Vector2[] genTriangle = new Vector2[] { new Vector2(), new Vector2(), new Vector2()};
+
     private Vector2[] generateTriangle(float minEdgeLength, float maxEdgeLength) {
         float firstAngle = 360f * random.nextFloat();
         float secondAngle = firstAngle + MathUtils.lerp(minTriangleAngle, maxTriangleAngle, random.nextFloat());
@@ -175,7 +188,6 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
         return genTriangle;
     }
-
     private static void centerPolygon(Vector2[] polygon) {
         float x = 0;
         float y = 0;
@@ -212,7 +224,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         body.createFixture(fixtureDef);
 
         worldTransformationManager.setWorldPosition(triangle, x, y);
-        
+
         return triangle;
     }
 
@@ -300,7 +312,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
         cameraSystem.screenToWorld(screenX, screenY, worldPointer);
-        int shapeId = spawnRandomShape(worldPointer.x, worldPointer.y);
+        int shapeId = spawnShape(activeType, worldPointer.x, worldPointer.y);
 
         if (dragSystem != null) {
             Body body = collisionSystem.getAttachedBody(shapeId);
@@ -329,5 +341,13 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     @Override
     public boolean scrolled(int amount) {
         return false;
+    }
+
+    public enum ShapeType {
+        Random,
+        Cube,
+        Circle,
+        Triangle,
+        NGon
     }
 }

@@ -6,6 +6,7 @@ buildscript {
         gdxVersion = '1.9.4'
         artemisVersion = '2.0.0'
         roboVMVersion = '2.2.0'
+        visuiVersion = '1.2.2'
     }
 
     repositories {
@@ -92,6 +93,8 @@ project(":html") {
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion:sources"
         compile "com.badlogicgames.gdx:gdx-box2d-gwt:$gdxVersion:sources"
 
+        compile "com.kotcrab.vis:vis-ui:$visuiVersion:sources"
+
         // artemis-odb
         compile "net.onedaybeard.artemis:artemis-odb-gwt:$artemisVersion"
         compile "net.onedaybeard.artemis:artemis-odb-gwt:$artemisVersion:sources"
@@ -117,8 +120,8 @@ project(":core") {
         compile project(":postprocessing")
 
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        compile "com.kotcrab.vis:vis-ui:$visuiVersion"
 
         // Artemis-odb
         compile "net.onedaybeard.artemis:artemis-odb:$artemisVersion"

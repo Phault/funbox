@@ -3,7 +3,8 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.widget.VisTextButton;
@@ -17,7 +18,16 @@ public class UIStage extends Stage {
     private MyGdxGame context;
 
     public UIStage(final MyGdxGame context) {
-        super(new ScreenViewport());
+        super();
+        ScreenViewport viewport = new ScreenViewport();
+        switch (Gdx.app.getType()) {
+            case Android:
+            case iOS:
+                viewport.setUnitsPerPixel(1f/Gdx.graphics.getDensity());
+                break;
+        }
+        setViewport(viewport);
+
         this.context = context;
 
         table = new Table();

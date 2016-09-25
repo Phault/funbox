@@ -2,12 +2,16 @@ package com.mygdx.game.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.EarClippingTriangulator;
+import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ShortArray;
 import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.scenegraph.components.Transform;
@@ -30,6 +34,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private CameraSystem cameraSystem;
     private InputSystem inputSystem;
     private ShapeDragSystem dragSystem;
+    private ShapeDrawingSystem drawingSystem;
 
     private Vector2 minSize = new Vector2(25, 25), maxSize = new Vector2(200, 200);
 
@@ -48,6 +53,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private CircleShape circleShape;
 
     private ShapeType activeType = ShapeType.Random;
+    private float drawingMinimumLineLength = 5;
 
     @Override
     protected void initialize() {
@@ -88,11 +94,6 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         this.activeType = activeType;
     }
 
-    private int spawnRandomShape(float x, float y) {
-        ShapeType type = ShapeType.values()[1 + random.nextInt(ShapeType.values().length - 1)];
-        return spawnShape(type, x, y);
-    }
-
     private int spawnShape(ShapeType type, float x, float y) {
         switch (type) {
             case Cube:
@@ -105,7 +106,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
                 return spawnRandomNGon(x, y);
         }
 
-        return spawnRandomShape(x, y);
+        return spawnShape(ShapeType.getRandom(), x, y);
     }
 
     private int spawnRandomNGon(float x, float y) {
@@ -308,16 +309,27 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     private final Vector2 worldPointer = new Vector2();
 
+    private IntMap<ShapeDrawing> activeDrawings = new IntMap<>();
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
         cameraSystem.screenToWorld(screenX, screenY, worldPointer);
-        int shapeId = spawnShape(activeType, worldPointer.x, worldPointer.y);
 
-        if (dragSystem != null) {
-            Body body = collisionSystem.getAttachedBody(shapeId);
-            worldPointer.scl(collisionSystem.getMetersPerPixel());
-            dragSystem.startDrag(body, pointer, worldPointer);
+        if (activeType == ShapeType.Custom) {
+            if (drawingSystem != null) {
+                ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor());
+                shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
+                activeDrawings.put(pointer, shapeDrawing);
+            }
+        }
+        else {
+            int spawnedId = spawnShape(activeType, worldPointer.x, worldPointer.y);
+            if (dragSystem != null) {
+                Body body = collisionSystem.getAttachedBody(spawnedId);
+                worldPointer.scl(collisionSystem.getMetersPerPixel());
+                dragSystem.startDrag(body, pointer, worldPointer);
+            }
         }
 
         return true;
@@ -325,11 +337,66 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+        ShapeDrawing shapeDrawing = activeDrawings.get(pointer);
+
+        if (shapeDrawing != null) {
+            activeDrawings.remove(pointer);
+
+            VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
+            for (int i = 0; i < vertices.size(); i++)
+                vertices.set(i, shapeDrawing.getPointX(i), shapeDrawing.getPointY(i));
+            GeometryUtils.ensureCCW(vertices.getBackingArray());
+            spawnPolygon(0, 0, vertices, shapeDrawing.getColor());
+
+            drawingSystem.destroyDrawing(shapeDrawing);
+
+            return true;
+        }
+
         return false;
     }
 
+    private final Vector2 secondLastDrawnPoint = new Vector2();
+    private final Vector2 lastDrawnPoint = new Vector2();
+    private final Vector2 prevLineDir = new Vector2();
+    private final Vector2 newLineDir = new Vector2();
+
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        ShapeDrawing shapeDrawing = activeDrawings.get(pointer);
+
+        if (shapeDrawing != null) {
+            cameraSystem.screenToWorld(screenX, screenY, worldPointer);
+
+            if (!shapeDrawing.isValidForNextPoint(worldPointer.x, worldPointer.y))
+                return true;
+
+            int pointCount = shapeDrawing.getPointCount();
+            shapeDrawing.getPoint(pointCount - 1, lastDrawnPoint);
+
+            float dot = 0;
+
+            float dist = newLineDir.set(worldPointer).sub(lastDrawnPoint).len();
+
+            if (pointCount > 1) {
+                shapeDrawing.getPoint(pointCount - 2, secondLastDrawnPoint);
+                prevLineDir.set(lastDrawnPoint).sub(secondLastDrawnPoint).nor();
+                newLineDir.nor();
+
+                dot = prevLineDir.dot(newLineDir);
+            }
+
+            if (pointCount > 1 && dot > 0.95f) {
+                shapeDrawing.setPoint(pointCount - 1, worldPointer.x, worldPointer.y);
+            }
+            else if (dist > drawingMinimumLineLength) {
+                shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
+            }
+
+            return true;
+        }
+
         return false;
     }
 
@@ -348,6 +415,11 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         Cube,
         Circle,
         Triangle,
-        NGon
+        NGon,
+        Custom;
+
+        public static ShapeType getRandom() {
+            return values()[MathUtils.random(Cube.ordinal(), NGon.ordinal())];
+        }
     }
 }

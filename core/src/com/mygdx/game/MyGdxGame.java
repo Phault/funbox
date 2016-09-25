@@ -61,6 +61,7 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new CameraSystem())
                 .with(new ZoomSystem())
                 .with(new ShapeRenderSystem())
+                .with(new ShapeDrawingSystem())
                 .with(new RenderSystem())
                 .with(box2DDebugRenderSystem);
 

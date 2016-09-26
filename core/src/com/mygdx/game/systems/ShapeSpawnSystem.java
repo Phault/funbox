@@ -317,7 +317,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         cameraSystem.screenToWorld(screenX, screenY, worldPointer);
 
         if (activeType == ShapeType.Custom) {
-            if (drawingSystem != null) {
+            if (drawingSystem != null && !activeDrawings.containsKey(pointer)) {
                 ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor());
                 shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
                 activeDrawings.put(pointer, shapeDrawing);

@@ -26,6 +26,7 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
     private float metersPerPixel = 1/pixelsPerMeter;
 
     private Vector2 gravity = new Vector2(0, -10);
+    private boolean isPaused = false;
     private World physicsWorld;
 
     private float timeStep = 1/60f;
@@ -70,6 +71,9 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
 
     @Override
     protected void processSystem() {
+        if (isPaused)
+            return;
+
         float frameTime = Math.min(Gdx.graphics.getRawDeltaTime(), 0.25f);
         accumulator += frameTime;
 
@@ -399,6 +403,14 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
                 y + 0.01f);
 
         return hitBody;
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public void setPaused(boolean paused) {
+        isPaused = paused;
     }
 
     public interface CollisionListener {

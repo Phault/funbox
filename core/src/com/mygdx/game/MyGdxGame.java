@@ -143,4 +143,8 @@ public class MyGdxGame extends ApplicationAdapter {
     public ShapeSpawnSystem getShapeSpawnSystem() {
         return shapeSpawnSystem;
     }
+
+    public CollisionSystem getCollisionSystem() {
+        return collisionSystem;
+    }
 }

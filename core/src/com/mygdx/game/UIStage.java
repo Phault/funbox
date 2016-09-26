@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.mygdx.game.systems.ShapeSpawnSystem;
 
@@ -46,7 +47,18 @@ public class UIStage extends Stage {
             });
             group.addActor(shapeButton);
         }
-        table.top().left().pad(10);
-        table.add(group);
+        table.pad(10);
+        table.add(group).expand().top().left();
+
+        final VisTextButton pauseButton = new VisTextButton("Pause", new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                context.getCollisionSystem().setPaused(!context.getCollisionSystem().isPaused());
+
+                ((VisTextButton) actor).setText(context.getCollisionSystem().isPaused() ? "Resume" : "Pause");
+            }
+        });
+
+        table.add(pauseButton).expand().top().right();
     }
 }

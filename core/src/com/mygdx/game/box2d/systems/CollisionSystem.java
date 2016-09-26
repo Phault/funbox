@@ -405,6 +405,28 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         return hitBody;
     }
 
+    public static boolean isTriangleValid(float[] triangle) {
+        if (triangle.length != 6)
+            return false;
+
+        float area = 0;
+
+        for (int currentVert = 0; currentVert < triangle.length; currentVert += 2)
+        {
+            float x1 = triangle[currentVert];
+            float y1 = triangle[currentVert+1];
+
+            int nextVert = (currentVert + 2) < triangle.length ? currentVert + 2 : 0;
+            float x2 = triangle[nextVert];
+            float y2 = triangle[nextVert + 1];
+
+            float D = x1 * y2 - y1 * x2;
+            area += 0.5f * D;
+        }
+
+        return area > 0.00001f;
+    }
+
     public boolean isPaused() {
         return isPaused;
     }

@@ -2,13 +2,11 @@ package com.mygdx.game.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
+import com.artemis.annotations.Wire;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.EarClippingTriangulator;
-import com.badlogic.gdx.math.GeometryUtils;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.IntMap;
@@ -33,7 +31,11 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private WorldTransformationManager worldTransformationManager;
     private CameraSystem cameraSystem;
     private InputSystem inputSystem;
+
+    @Wire(failOnNull = false)
     private ShapeDragSystem dragSystem;
+
+    @Wire(failOnNull = false)
     private ShapeDrawingSystem drawingSystem;
 
     private Vector2 minSize = new Vector2(25, 25), maxSize = new Vector2(200, 200);
@@ -53,7 +55,6 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private CircleShape circleShape;
 
     private ShapeType activeType = ShapeType.Random;
-    private float drawingMinimumLineLength = 5;
 
     @Override
     protected void initialize() {
@@ -281,6 +282,12 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
                 tmpTriangle[triangleVertex] = scaledX;
                 tmpTriangle[triangleVertex+1] = scaledY;
             }
+
+            GeometryUtils.ensureCCW(tmpTriangle);
+
+            if (!CollisionSystem.isTriangleValid(tmpTriangle))
+                continue;
+
             polygonShape.set(tmpTriangle);
             fixtureDef.shape = polygonShape;
             body.createFixture(fixtureDef);
@@ -337,12 +344,12 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
         ShapeDrawing shapeDrawing = activeDrawings.get(pointer);
 
         if (shapeDrawing != null) {
             activeDrawings.remove(pointer);
 
+            shapeDrawing.optimize();
             if (shapeDrawing.isValid()) {
                 VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
                 for (int i = 0; i < vertices.size(); i++)
@@ -359,11 +366,6 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         return false;
     }
 
-    private final Vector2 secondLastDrawnPoint = new Vector2();
-    private final Vector2 lastDrawnPoint = new Vector2();
-    private final Vector2 prevLineDir = new Vector2();
-    private final Vector2 newLineDir = new Vector2();
-
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         ShapeDrawing shapeDrawing = activeDrawings.get(pointer);
@@ -371,30 +373,8 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         if (shapeDrawing != null) {
             cameraSystem.screenToWorld(screenX, screenY, worldPointer);
 
-            if (!shapeDrawing.isValidForNextPoint(worldPointer.x, worldPointer.y))
-                return true;
-
-            int pointCount = shapeDrawing.getPointCount();
-            shapeDrawing.getPoint(pointCount - 1, lastDrawnPoint);
-
-            float dot = 0;
-
-            float dist = newLineDir.set(worldPointer).sub(lastDrawnPoint).len();
-
-            if (pointCount > 1) {
-                shapeDrawing.getPoint(pointCount - 2, secondLastDrawnPoint);
-                prevLineDir.set(lastDrawnPoint).sub(secondLastDrawnPoint).nor();
-                newLineDir.nor();
-
-                dot = prevLineDir.dot(newLineDir);
-            }
-
-            if (pointCount > 1 && dot > 0.95f) {
-                shapeDrawing.setPoint(pointCount - 1, worldPointer.x, worldPointer.y);
-            }
-            else if (dist > drawingMinimumLineLength) {
+            if (shapeDrawing.isValidForNextPoint(worldPointer.x, worldPointer.y))
                 shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
-            }
 
             return true;
         }

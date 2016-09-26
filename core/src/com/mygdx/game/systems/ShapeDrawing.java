@@ -1,16 +1,20 @@
 package com.mygdx.game.systems;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.utils.MathHelper;
 
 /**
  * Created by Casper on 24-09-2016.
  */
 public class ShapeDrawing implements Pool.Poolable {
+    private final static String TAG = "ShapeDrawing";
+
     private Color color = new Color(1, 1, 1, 1);
     private FloatArray points = new FloatArray();
 
@@ -20,6 +24,12 @@ public class ShapeDrawing implements Pool.Poolable {
 
     public void getPoint(int index, Vector2 result) {
         result.set(getPointX(index), getPointY(index));
+    }
+
+    public int getPointWrapping(int index, Vector2 result) {
+        int wrappedIndex = MathHelper.wrapAround(index, 0, getPointCount()-1);
+        getPoint(wrappedIndex, result);
+        return wrappedIndex;
     }
 
     public float getPointX(int index) {
@@ -33,6 +43,11 @@ public class ShapeDrawing implements Pool.Poolable {
     public void addPoint(float x, float y) {
         points.add(x);
         points.add(y);
+    }
+
+    public void removePoint(int index) {
+        points.removeIndex(index * 2 + 1);
+        points.removeIndex(index * 2);
     }
 
     public void setPoint(int index, float x, float y) {
@@ -144,5 +159,29 @@ public class ShapeDrawing implements Pool.Poolable {
         }
 
         return false;
+    }
+
+    private final Vector2 previous = new Vector2();
+    private final Vector2 current = new Vector2();
+    private final Vector2 next = new Vector2();
+    private final Vector2 previousLine = new Vector2();
+    private final Vector2 nextLine = new Vector2();
+    public void optimize() {
+        int trisCountBefore = getPointCount();
+        for (int i = 0; i < getPointCount(); i++) {
+            getPointWrapping(i - 1, previous);
+            getPoint(i, current);
+            getPointWrapping(i + 1, next);
+
+            previousLine.set(current).sub(previous).nor();
+            nextLine.set(next).sub(current).nor();
+
+            float dot = nextLine.dot(previousLine);
+            if (dot > 0.98f) {
+                removePoint(i);
+                i--;
+            }
+        }
+        Gdx.app.log(TAG, "Tris count before: " + trisCountBefore + ", after: "+getPointCount());
     }
 }

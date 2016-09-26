@@ -39,7 +39,7 @@ public class ShapeDrawingSystem extends BaseSystem {
     protected void processSystem() {
         for (int i = 0; i < activeDrawings.size(); i++) {
             ShapeDrawing shapeDrawing = activeDrawings.get(i);
-            if (shapeDrawing != null && shapeDrawing.getPointCount() > 2)
+            if (shapeDrawing != null)
                 renderDrawing(shapeDrawing);
         }
     }
@@ -53,7 +53,12 @@ public class ShapeDrawingSystem extends BaseSystem {
 
     private void renderDrawing(ShapeDrawing shapeDrawing) {
         shapeRenderer.setColor(shapeDrawing.getColor());
-        shapeRenderer.polyline(shapeDrawing.getPoints().items, 0, shapeDrawing.getPoints().size);
+        if (shapeDrawing.getPointCount() > 2)
+            shapeRenderer.polyline(shapeDrawing.getPoints().items, 0, shapeDrawing.getPoints().size);
+        else if (shapeDrawing.getPointCount() == 2) {
+            shapeRenderer.line(shapeDrawing.getPointX(0), shapeDrawing.getPointY(0),
+                    shapeDrawing.getPointX(1), shapeDrawing.getPointY(1));
+        }
     }
 
     public ShapeDrawing createDrawing(Color color) {

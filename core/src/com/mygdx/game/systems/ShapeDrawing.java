@@ -75,6 +75,10 @@ public class ShapeDrawing implements Pool.Poolable {
         return true;
     }
 
+    public boolean isValid() {
+        return getPointCount() >= 3 && !isSelfIntersecting();
+    }
+
     public boolean containsPoint(float x, float y, float tolerance) {
         float sqrTolerance = tolerance * tolerance;
 
@@ -105,5 +109,40 @@ public class ShapeDrawing implements Pool.Poolable {
 
     public void setColor(Color color) {
         this.color.set(color);
+    }
+
+    public boolean isSelfIntersecting() {
+        if (getPointCount() <= 2)
+            return false;
+
+        for (int i = 0; i < getPointCount(); i++) {
+            float fromX1 = getPointX(i);
+            float fromY1 = getPointY(i);
+            int nextPoint = (i+1) % getPointCount();
+            float toX1 = getPointX(nextPoint);
+            float toY1 = getPointY(nextPoint);
+
+            fromX1 = MathUtils.lerp(fromX1, toX1, 0.00001f);
+            fromY1 = MathUtils.lerp(fromY1, toY1, 0.00001f);
+            toX1 = MathUtils.lerp(toX1, fromX1, 0.00001f);
+            toY1 = MathUtils.lerp(toY1, fromY1, 0.00001f);
+
+            for (int j = 0; j < getPointCount(); j++) {
+                if (i == j) continue;
+
+                float fromX2 = getPointX(j);
+                float fromY2 = getPointY(j);
+                nextPoint = (j+1) % getPointCount();
+                float toX2 = getPointX(nextPoint);
+                float toY2 = getPointY(nextPoint);
+
+                if (Intersector.intersectSegments(fromX1, fromY1, toX1, toY1,
+                        fromX2, fromY2, toX2, toY2, null)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

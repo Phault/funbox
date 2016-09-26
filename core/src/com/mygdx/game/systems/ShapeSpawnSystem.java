@@ -65,7 +65,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         bodyDef.type = BodyDef.BodyType.DynamicBody;
 
         fixtureDef = new FixtureDef();
-        fixtureDef.density = 2;
+        fixtureDef.density = 10;
 
         circleShape = new CircleShape();
         polygonShape = new PolygonShape();
@@ -343,11 +343,13 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         if (shapeDrawing != null) {
             activeDrawings.remove(pointer);
 
-            VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
-            for (int i = 0; i < vertices.size(); i++)
-                vertices.set(i, shapeDrawing.getPointX(i), shapeDrawing.getPointY(i));
-            GeometryUtils.ensureCCW(vertices.getBackingArray());
-            spawnPolygon(0, 0, vertices, shapeDrawing.getColor());
+            if (shapeDrawing.isValid()) {
+                VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
+                for (int i = 0; i < vertices.size(); i++)
+                    vertices.set(i, shapeDrawing.getPointX(i), shapeDrawing.getPointY(i));
+                GeometryUtils.ensureCCW(vertices.getBackingArray());
+                spawnPolygon(0, 0, vertices, shapeDrawing.getColor());
+            }
 
             drawingSystem.destroyDrawing(shapeDrawing);
 

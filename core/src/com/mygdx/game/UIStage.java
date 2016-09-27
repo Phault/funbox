@@ -2,17 +2,14 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.utils.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.systems.ShapeSpawnSystem;
@@ -86,7 +83,7 @@ public class UIStage extends Stage {
 
     private void loadTextures() {
         for (ShapeSpawnSystem.ShapeType type : ShapeSpawnSystem.ShapeType.values()) {
-            String textureName = String.format("icon_%s", type.toString().toLowerCase());
+            String textureName = "icon_" + type.toString().toLowerCase();
             Drawable drawable = skin.getDrawable(textureName);
             shapeIcons.put(type, drawable);
         }

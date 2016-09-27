@@ -1,0 +1,9 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: { default-font: { file: default.fnt } },
+com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+	default: { up: button_square_normal, down: button_square_down }
+},
+com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
+	default: { up: button_square_normal, down: button_square_down }
+}
+}

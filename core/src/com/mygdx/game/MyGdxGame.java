@@ -42,7 +42,7 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
 	public void create () {
 
-        VisUI.load(VisUI.SkinScale.X2);
+//        VisUI.load(VisUI.SkinScale.X2);
         uiStage = new UIStage(this);
         inputSystem.addProcessor(uiStage);
 
@@ -55,6 +55,7 @@ public class MyGdxGame extends ApplicationAdapter {
                 .with(new HierarchyManager())
                 .with(worldTransformationManager)
                 .with(collisionSystem)
+                .with(new ExplosionSystem())
                 .with(new ShapeDragSystem())
                 .with(shapeSpawnSystem)
                 .with(new TestMovementSystem())

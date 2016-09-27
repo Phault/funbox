@@ -56,6 +56,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     private ShapeType activeType = ShapeType.Random;
     private float minimumDrawingPointDistance = 5;
+    private ExplosionSystem explosionSystem;
 
     @Override
     protected void initialize() {
@@ -106,6 +107,9 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
                 return spawnRandomTriangle(x, y);
             case NGon:
                 return spawnRandomNGon(x, y);
+            case Explosion:
+                explosionSystem.spawnExplosion(x, y, 60, 100);
+                return -1;
         }
 
         return spawnShape(ShapeType.getRandom(), x, y);
@@ -333,7 +337,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         }
         else {
             int spawnedId = spawnShape(activeType, worldPointer.x, worldPointer.y);
-            if (dragSystem != null) {
+            if (dragSystem != null && spawnedId != -1) {
                 Body body = collisionSystem.getAttachedBody(spawnedId);
                 worldPointer.scl(collisionSystem.getMetersPerPixel());
                 dragSystem.startDrag(body, pointer, worldPointer);
@@ -399,7 +403,8 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         Circle,
         Triangle,
         NGon,
-        Custom;
+        Custom,
+        Explosion;
 
         public static ShapeType getRandom() {
             return values()[MathUtils.random(Cube.ordinal(), NGon.ordinal())];

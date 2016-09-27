@@ -17,6 +17,7 @@ public class ShapeDrawing implements Pool.Poolable {
 
     private Color color = new Color(1, 1, 1, 1);
     private FloatArray points = new FloatArray();
+    private float minimumPointDistance;
 
     public int getPointCount() {
         return points.size / 2;
@@ -56,7 +57,7 @@ public class ShapeDrawing implements Pool.Poolable {
     }
 
     public boolean isValidForNextPoint(float x, float y) {
-        if (containsPoint(x, y, 5f))
+        if (containsPoint(x, y, minimumPointDistance))
             return false;
 
         if (getPointCount() <= 2)
@@ -183,5 +184,13 @@ public class ShapeDrawing implements Pool.Poolable {
             }
         }
         Gdx.app.log(TAG, "Tris count before: " + trisCountBefore + ", after: "+getPointCount());
+    }
+
+    public float getMinimumPointDistance() {
+        return minimumPointDistance;
+    }
+
+    public void setMinimumPointDistance(float minimumPointDistance) {
+        this.minimumPointDistance = minimumPointDistance;
     }
 }

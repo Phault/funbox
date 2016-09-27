@@ -61,9 +61,10 @@ public class ShapeDrawingSystem extends BaseSystem {
         }
     }
 
-    public ShapeDrawing createDrawing(Color color) {
+    public ShapeDrawing createDrawing(Color color, float minimumPointDistance) {
         ShapeDrawing shapeDrawing = drawingPool.obtain();
         shapeDrawing.setColor(color);
+        shapeDrawing.setMinimumPointDistance(minimumPointDistance);
         activeDrawings.add(shapeDrawing);
         return shapeDrawing;
     }

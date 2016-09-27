@@ -55,6 +55,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private CircleShape circleShape;
 
     private ShapeType activeType = ShapeType.Random;
+    private float minimumDrawingPointDistance = 5;
 
     @Override
     protected void initialize() {
@@ -325,7 +326,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
         if (activeType == ShapeType.Custom) {
             if (drawingSystem != null && !activeDrawings.containsKey(pointer)) {
-                ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor());
+                ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor(), minimumDrawingPointDistance);
                 shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
                 activeDrawings.put(pointer, shapeDrawing);
             }

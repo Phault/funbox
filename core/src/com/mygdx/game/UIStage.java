@@ -30,7 +30,7 @@ public class UIStage extends Stage {
     public UIStage(final MyGdxGame context) {
         super();
 
-        skin = new Skin(new FileHandle("ui/uiskin.json"));
+        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
         ScreenViewport viewport = new ScreenViewport();
         switch (Gdx.app.getType()) {

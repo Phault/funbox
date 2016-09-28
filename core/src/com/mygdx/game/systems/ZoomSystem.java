@@ -1,8 +1,10 @@
 package com.mygdx.game.systems;
 
 import com.artemis.BaseSystem;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * Created by Casper on 18-09-2016.
@@ -20,6 +22,8 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
         super.initialize();
 
         inputSystem.addProcessor(this);
+
+        scrolled(0);
     }
 
     @Override
@@ -69,6 +73,7 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
         return false;
     }
 
+    private final Vector2 tmpPos = new Vector2();
     @Override
     public boolean scrolled(int amount) {
 
@@ -76,6 +81,13 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
         zoom += step * amount;
         zoom = MathUtils.clamp(zoom, minZoom, maxZoom);
         cameraSystem.setZoom(zoom);
+        cameraSystem.getCamera().update();
+
+        // make sure to keep the bottom of the camera at 0 in y
+        cameraSystem.screenToWorld(0, Gdx.graphics.getHeight() - 25, tmpPos);
+        tmpPos.x = 0;
+        tmpPos.scl(-1).add(cameraSystem.getPosition().x, cameraSystem.getPosition().y);
+        cameraSystem.setPosition(tmpPos.x, tmpPos.y);
 
         return true;
     }

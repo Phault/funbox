@@ -53,6 +53,14 @@ public class CameraSystem extends BaseSystem {
         return result;
     }
 
+    public void setPosition(float x, float y) {
+        camera.position.set(x, y, 0);
+    }
+
+    public Vector3 getPosition() {
+        return camera.position;
+    }
+
     public void setZoom(float value) {
         camera.zoom = value;
     }

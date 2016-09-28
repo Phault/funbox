@@ -9,6 +9,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.bitfire.postprocessing.PostProcessor;
@@ -21,6 +22,7 @@ import com.mygdx.game.box2d.systems.CollisionSystem;
 import com.mygdx.game.hierarchy.systems.HierarchyManager;
 import com.mygdx.game.scenegraph.components.Transform;
 import com.mygdx.game.scenegraph.systems.WorldTransformationManager;
+import com.mygdx.game.shaperendering.components.RenderRectangle;
 import com.mygdx.game.shaperendering.systems.ShapeRenderSystem;
 import com.mygdx.game.systems.*;
 
@@ -81,12 +83,7 @@ public class MyGdxGame extends ApplicationAdapter {
         world = new World(config);
         box2DDebugRenderSystem.setEnabled(false);
 
-        int ground = world.create();
-        EntityEdit edit = world.edit(ground);
-        edit.create(Transform.class);
-        EdgeShape groundShape = new EdgeShape();
-        groundShape.set(-100, 0, 100, 0);
-        collisionSystem.createFixture(ground, groundShape, 1);
+        createGround();
 
         boolean isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
         ShaderLoader.BasePath = "shaders/";
@@ -102,6 +99,29 @@ public class MyGdxGame extends ApplicationAdapter {
                 return true;
             }
         });
+    }
+
+    private int createGround() {
+        int ground = world.create();
+        EntityEdit edit = world.edit(ground);
+        edit.create(Transform.class);
+
+        float width = 15000;
+        float height = 400;
+
+        RenderRectangle groundVisual = edit.create(RenderRectangle.class);
+        groundVisual.width = width;
+        groundVisual.height = height;
+        groundVisual.origin.set(0.5f, 1);
+        groundVisual.color.set(Color.DARK_GRAY);
+
+        float halfWidth = 0.5f * width * collisionSystem.getMetersPerPixel();
+
+        EdgeShape groundShape = new EdgeShape();
+        groundShape.set(-halfWidth, 0, halfWidth, 0);
+        collisionSystem.createFixture(ground, groundShape, 1);
+
+        return ground;
     }
 
     @Override

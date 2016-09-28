@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -30,7 +31,8 @@ public class UIStage extends Stage {
     public UIStage(final MyGdxGame context) {
         super();
 
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("ui/uiskin.atlas"));
+        skin = new Skin(Gdx.files.internal("ui/uiskin.json"), atlas);
 
         ScreenViewport viewport = new ScreenViewport();
         switch (Gdx.app.getType()) {

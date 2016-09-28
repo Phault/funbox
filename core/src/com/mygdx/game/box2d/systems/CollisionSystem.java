@@ -47,6 +47,7 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         Box2D.init();
 
         physicsWorld = new World(gravity, true);
+        physicsWorld.setContinuousPhysics(false);
 //        physicsWorld.setContactListener(this);
         staticBody = physicsWorld.createBody(staticBodyDef);
     }

@@ -1,16 +1,15 @@
 package com.mygdx.game.systems;
 
 import com.artemis.BaseSystem;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.Array;
 
 /**
  * Created by Casper on 18-09-2016.
- *
- * At the moment just copied straight from InputMultiplexer.
  */
 public class InputSystem extends BaseSystem implements InputProcessor {
-    private Array<InputProcessor> processors = new Array(4);
+    private InputMultiplexer multiplexer = new InputMultiplexer();
 
     @Override
     protected void processSystem() {
@@ -18,87 +17,66 @@ public class InputSystem extends BaseSystem implements InputProcessor {
     }
 
     public void addProcessor (int index, InputProcessor processor) {
-        if (processor == null) throw new NullPointerException("processor cannot be null");
-        processors.insert(index, processor);
+        multiplexer.addProcessor(index, processor);
     }
 
     public void removeProcessor (int index) {
-        processors.removeIndex(index);
+        multiplexer.removeProcessor(index);
     }
 
     public void addProcessor (InputProcessor processor) {
-        if (processor == null) throw new NullPointerException("processor cannot be null");
-        processors.add(processor);
+        multiplexer.addProcessor(processor);
     }
 
     public void removeProcessor (InputProcessor processor) {
-        processors.removeValue(processor, true);
+        multiplexer.removeProcessor(processor);
     }
 
-    /** @return the number of processors in this multiplexer */
     public int size () {
-        return processors.size;
+        return multiplexer.size();
     }
 
     public void clear () {
-        processors.clear();
+        multiplexer.clear();
     }
 
     public void setProcessors (Array<InputProcessor> processors) {
-        this.processors = processors;
+        multiplexer.setProcessors(processors);
     }
 
     public Array<InputProcessor> getProcessors () {
-        return processors;
+        return multiplexer.getProcessors();
     }
 
     public boolean keyDown (int keycode) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).keyDown(keycode)) return true;
-        return false;
+        return multiplexer.keyDown(keycode);
     }
 
     public boolean keyUp (int keycode) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).keyUp(keycode)) return true;
-        return false;
+        return multiplexer.keyUp(keycode);
     }
 
     public boolean keyTyped (char character) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).keyTyped(character)) return true;
-        return false;
+        return multiplexer.keyTyped(character);
     }
 
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).touchDown(screenX, screenY, pointer, button)) return true;
-        return false;
+        return multiplexer.touchDown(screenX, screenY, pointer, button);
     }
 
     public boolean touchUp (int screenX, int screenY, int pointer, int button) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).touchUp(screenX, screenY, pointer, button)) return true;
-        return false;
+        return multiplexer.touchUp(screenX, screenY, pointer, button);
     }
 
     public boolean touchDragged (int screenX, int screenY, int pointer) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).touchDragged(screenX, screenY, pointer)) return true;
-        return false;
+        return multiplexer.touchDragged(screenX, screenY, pointer);
     }
 
-    @Override
     public boolean mouseMoved (int screenX, int screenY) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).mouseMoved(screenX, screenY)) return true;
-        return false;
+        return multiplexer.mouseMoved(screenX, screenY);
     }
 
-    @Override
     public boolean scrolled (int amount) {
-        for (int i = 0, n = processors.size; i < n; i++)
-            if (processors.get(i).scrolled(amount)) return true;
-        return false;
+        return multiplexer.scrolled(amount);
     }
 }

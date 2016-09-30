@@ -168,7 +168,7 @@ public class ShapeDrawing implements Pool.Poolable {
     private final Vector2 previousLine = new Vector2();
     private final Vector2 nextLine = new Vector2();
     public void optimize() {
-        int trisCountBefore = getPointCount();
+        int vertexCountBefore = getPointCount();
         for (int i = 0; i < getPointCount(); i++) {
             getPointWrapping(i - 1, previous);
             getPoint(i, current);
@@ -183,7 +183,7 @@ public class ShapeDrawing implements Pool.Poolable {
                 i--;
             }
         }
-        Gdx.app.log(TAG, "Tris count before: " + trisCountBefore + ", after: "+getPointCount());
+        Gdx.app.log(TAG, "Vertex count before: " + vertexCountBefore + ", after: "+getPointCount());
     }
 
     public float getMinimumPointDistance() {

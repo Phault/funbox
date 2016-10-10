@@ -57,7 +57,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private ShapeType activeType = ShapeType.Random;
     private float minimumDrawingPointDistance = 5;
     private ExplosionSystem explosionSystem;
-    private float baseMinIntermediatePointDistance = 3;
+    private float baseMinIntermediatePointDistance = 2;
 
     @Override
     protected void initialize() {

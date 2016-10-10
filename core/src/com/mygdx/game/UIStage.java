@@ -5,10 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -51,6 +48,8 @@ public class UIStage extends Stage {
         table.setFillParent(true);
         addActor(table);
 
+        ButtonGroup<ImageButton> buttonGroup = new ButtonGroup<>();
+
         VerticalGroup group = new VerticalGroup();
         group.fill();
         group.space(10);
@@ -64,6 +63,7 @@ public class UIStage extends Stage {
                     context.getShapeSpawnSystem().setActiveType(type);
                 }
             });
+            buttonGroup.add(shapeButton);
             group.addActor(shapeButton);
         }
         table.pad(10);
@@ -71,6 +71,7 @@ public class UIStage extends Stage {
 
         ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle(skin.get(ImageButton.ImageButtonStyle.class));
         style.imageUp = pauseIcon;
+        style.checked = null;
         final ImageButton pauseButton = new ImageButton(style);
         pauseButton.addListener(new ChangeListener() {
             @Override

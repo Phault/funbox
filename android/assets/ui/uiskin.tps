@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.2.3</string>
         <key>fileName</key>
-        <string>C:/Users/Casper/Downloads/MyGdxGame/android/assets/ui/uiskin.tps</string>
+        <string>C:/Users/Casper/Documents/mygdxgame/android/assets/ui/uiskin.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -188,6 +188,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">buttons/button_square_checked.png</key>
             <key type="filename">buttons/button_square_down.png</key>
             <key type="filename">buttons/button_square_normal.png</key>
             <key type="filename">icons/icon_circle.png</key>

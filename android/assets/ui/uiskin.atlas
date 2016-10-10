@@ -1,81 +1,88 @@
 uiskin.png
-size: 118, 187
+size: 118, 232
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
+button_square_checked
+  rotate: false
+  xy: 57, 175
+  size: 57, 57
+  orig: 57, 57
+  offset: 0, 0
+  index: -1
 button_square_down
   rotate: false
-  xy: 0, 0
+  xy: 0, 175
   size: 57, 57
   orig: 57, 57
   offset: 0, 0
   index: -1
 button_square_normal
   rotate: false
-  xy: 57, 0
+  xy: 41, 118
   size: 57, 57
   orig: 57, 57
   offset: 0, 0
   index: -1
 icon_circle
   rotate: false
-  xy: 0, 57
+  xy: 41, 77
   size: 41, 41
   orig: 41, 41
   offset: 0, 0
   index: -1
 icon_cube
   rotate: false
-  xy: 41, 57
+  xy: 72, 0
   size: 36, 36
   orig: 36, 36
   offset: 0, 0
   index: -1
 icon_custom
   rotate: false
-  xy: 77, 57
+  xy: 0, 77
   size: 41, 41
   orig: 41, 41
   offset: 0, 0
   index: -1
 icon_explosion
   rotate: false
-  xy: 0, 98
+  xy: 0, 118
   size: 41, 48
   orig: 41, 48
   offset: 0, 0
   index: -1
 icon_ngon
   rotate: false
-  xy: 41, 98
+  xy: 0, 36
   size: 41, 36
   orig: 41, 36
   offset: 0, 0
   index: -1
 icon_pause
   rotate: false
-  xy: 82, 98
+  xy: 36, 0
   size: 36, 36
   orig: 36, 36
   offset: 0, 0
   index: -1
 icon_play
   rotate: false
-  xy: 0, 146
+  xy: 82, 36
   size: 36, 41
   orig: 36, 41
   offset: 0, 0
   index: -1
 icon_random
   rotate: false
-  xy: 36, 146
+  xy: 0, 0
   size: 36, 36
   orig: 36, 36
   offset: 0, 0
   index: -1
 icon_triangle
   rotate: false
-  xy: 72, 146
+  xy: 41, 36
   size: 41, 36
   orig: 41, 36
   offset: 0, 0

@@ -165,20 +165,16 @@ public class ShapeDrawing implements Pool.Poolable {
     private final Vector2 previous = new Vector2();
     private final Vector2 current = new Vector2();
     private final Vector2 next = new Vector2();
-    private final Vector2 previousLine = new Vector2();
-    private final Vector2 nextLine = new Vector2();
-    public void optimize() {
+    public void optimize(float minIntermediatePointDistance) {
         int vertexCountBefore = getPointCount();
         for (int i = 0; i < getPointCount(); i++) {
             getPointWrapping(i - 1, previous);
             getPoint(i, current);
             getPointWrapping(i + 1, next);
 
-            previousLine.set(current).sub(previous).nor();
-            nextLine.set(next).sub(current).nor();
+            float dist = MathHelper.lineToPointDistance(previous, next, current, true);
 
-            float dot = nextLine.dot(previousLine);
-            if (dot > 0.98f) {
+            if (dist < minIntermediatePointDistance) {
                 removePoint(i);
                 i--;
             }

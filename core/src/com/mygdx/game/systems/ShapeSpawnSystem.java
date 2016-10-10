@@ -57,6 +57,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private ShapeType activeType = ShapeType.Random;
     private float minimumDrawingPointDistance = 5;
     private ExplosionSystem explosionSystem;
+    private float baseMinIntermediatePointDistance = 3;
 
     @Override
     protected void initialize() {
@@ -330,7 +331,8 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
         if (activeType == ShapeType.Custom) {
             if (drawingSystem != null && !activeDrawings.containsKey(pointer)) {
-                ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor(), minimumDrawingPointDistance);
+                ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor(),
+                        minimumDrawingPointDistance * cameraSystem.getZoom());
                 shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
                 activeDrawings.put(pointer, shapeDrawing);
             }
@@ -354,7 +356,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         if (shapeDrawing != null) {
             activeDrawings.remove(pointer);
 
-            shapeDrawing.optimize();
+            shapeDrawing.optimize(baseMinIntermediatePointDistance * cameraSystem.getZoom());
             if (shapeDrawing.isValid()) {
                 VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
                 for (int i = 0; i < vertices.size(); i++)

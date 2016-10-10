@@ -3,12 +3,10 @@ package com.mygdx.game.systems;
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
 import com.artemis.annotations.Wire;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.ShortArray;
 import com.mygdx.game.box2d.systems.CollisionSystem;
@@ -118,24 +116,24 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     private int spawnRandomNGon(float x, float y) {
         int sides = 5 + random.nextInt(4);
-        float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat());
+        float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat()) * getScaleModifier();
         return spawnNGon(x, y, sides, radius, getRandomColor());
     }
 
     private int spawnRandomCube(float x, float y) {
-        float width = MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat());
-        float height = MathUtils.lerp(minSize.y, maxSize.y, random.nextFloat());
+        float width = MathUtils.lerp(minSize.x, maxSize.x, random.nextFloat()) * getScaleModifier();
+        float height = MathUtils.lerp(minSize.y, maxSize.y, random.nextFloat()) * getScaleModifier();
 
         return spawnCube(x, y, width, height, getRandomColor());
     }
 
     private int spawnRandomCircle(float x, float y) {
-        float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat());
+        float radius = MathUtils.lerp(minRadius, maxRadius, random.nextFloat()) * getScaleModifier();
         return spawnCircle(x, y, radius, getRandomColor());
     }
 
     public int spawnRandomTriangle(float x, float y) {
-        Vector2[] triangle = generateTriangle(minSize.x, maxSize.x);
+        Vector2[] triangle = generateTriangle(minSize.x * getScaleModifier(), maxSize.x * getScaleModifier());
         return spawnTriangle(x, y, triangle, getRandomColor());
     }
 
@@ -332,7 +330,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         if (activeType == ShapeType.Custom) {
             if (drawingSystem != null && !activeDrawings.containsKey(pointer)) {
                 ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor(),
-                        minimumDrawingPointDistance * cameraSystem.getZoom());
+                        minimumDrawingPointDistance * getScaleModifier());
                 shapeDrawing.addPoint(worldPointer.x, worldPointer.y);
                 activeDrawings.put(pointer, shapeDrawing);
             }
@@ -349,6 +347,10 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         return true;
     }
 
+    private float getScaleModifier() {
+        return cameraSystem.getZoom();
+    }
+
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         ShapeDrawing shapeDrawing = activeDrawings.get(pointer);
@@ -356,7 +358,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         if (shapeDrawing != null) {
             activeDrawings.remove(pointer);
 
-            shapeDrawing.optimize(baseMinIntermediatePointDistance * cameraSystem.getZoom());
+            shapeDrawing.optimize(baseMinIntermediatePointDistance * getScaleModifier());
             if (shapeDrawing.isValid()) {
                 VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
                 for (int i = 0; i < vertices.size(); i++)

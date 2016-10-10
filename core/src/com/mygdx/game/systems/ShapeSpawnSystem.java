@@ -107,7 +107,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
             case NGon:
                 return spawnRandomNGon(x, y);
             case Explosion:
-                explosionSystem.spawnExplosion(x, y, 60, 100);
+                explosionSystem.spawnExplosion(x, y, 300 * getScaleModifier(), 400 * getScaleModifier(), 60);
                 return -1;
         }
 

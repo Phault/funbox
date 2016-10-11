@@ -62,7 +62,6 @@ public class ShapeRenderSystem extends IteratingSystem {
         if (shape != null)
             renderTriangle((RenderTriangle) shape);
 
-
         shape = mPolygons.get(entityId);
         if (shape != null)
             renderPolygon((RenderPolygon) shape);

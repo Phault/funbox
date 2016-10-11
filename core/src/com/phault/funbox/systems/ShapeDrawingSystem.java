@@ -4,6 +4,7 @@ import com.artemis.BaseSystem;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
 
 /**
@@ -23,6 +24,8 @@ public class ShapeDrawingSystem extends BaseSystem {
     private ShapeRenderer shapeRenderer = new ShapeRenderer();
     private CameraSystem cameraSystem;
 
+    private float lineWidth = 3;
+
     public ShapeDrawingSystem() {
 
     }
@@ -32,7 +35,7 @@ public class ShapeDrawingSystem extends BaseSystem {
         super.begin();
 
         shapeRenderer.setProjectionMatrix(cameraSystem.getMatrix());
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
     }
 
     @Override
@@ -51,13 +54,22 @@ public class ShapeDrawingSystem extends BaseSystem {
         shapeRenderer.end();
     }
 
+    private final Vector2 current = new Vector2();
+    private final Vector2 next = new Vector2();
+
     private void renderDrawing(ShapeDrawing shapeDrawing) {
+        if (shapeDrawing.getPointCount() <= 1)
+            return;
+
         shapeRenderer.setColor(shapeDrawing.getColor());
-        if (shapeDrawing.getPointCount() > 2)
-            shapeRenderer.polyline(shapeDrawing.getPoints().items, 0, shapeDrawing.getPoints().size);
-        else if (shapeDrawing.getPointCount() == 2) {
-            shapeRenderer.line(shapeDrawing.getPointX(0), shapeDrawing.getPointY(0),
-                    shapeDrawing.getPointX(1), shapeDrawing.getPointY(1));
+
+        for (int i = 0; i < shapeDrawing.getPointCount(); i++) {
+            shapeDrawing.getPoint(i, current);
+            shapeDrawing.getPointWrapping(i+1, next);
+
+            shapeRenderer.rectLine(current.x, current.y,
+                    next.x, next.y,
+                    lineWidth * cameraSystem.getZoom());
         }
     }
 
@@ -72,5 +84,13 @@ public class ShapeDrawingSystem extends BaseSystem {
     public void destroyDrawing(ShapeDrawing shapeDrawing) {
         activeDrawings.remove(shapeDrawing);
         drawingPool.free(shapeDrawing);
+    }
+
+    public float getLineWidth() {
+        return lineWidth;
+    }
+
+    public void setLineWidth(float lineWidth) {
+        this.lineWidth = lineWidth;
     }
 }

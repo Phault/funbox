@@ -41,6 +41,8 @@ public class Funbox extends ApplicationAdapter {
 
     private UIStage uiStage;
 
+    private final Color clearColor = new Color(0.07f, 0.07f, 0.07f, 1);
+
     @Override
 	public void create () {
 
@@ -88,6 +90,7 @@ public class Funbox extends ApplicationAdapter {
         boolean isDesktop = Gdx.app.getType() == Application.ApplicationType.Desktop;
         ShaderLoader.BasePath = "shaders/";
         postProcessor = new PostProcessor(false, false, isDesktop);
+        postProcessor.setClearColor(clearColor);
 
         Antialiasing antialiasing = new Fxaa(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         postProcessor.addEffect(antialiasing);
@@ -139,7 +142,7 @@ public class Funbox extends ApplicationAdapter {
 
     @Override
 	public void render () {
-        Gdx.gl20.glClearColor(0,0,0,1);
+        Gdx.gl20.glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         postProcessor.capture();

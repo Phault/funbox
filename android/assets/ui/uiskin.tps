@@ -192,7 +192,7 @@
             <key type="filename">buttons/button_square_down.png</key>
             <key type="filename">buttons/button_square_normal.png</key>
             <key type="filename">icons/icon_circle.png</key>
-            <key type="filename">icons/icon_cube.png</key>
+            <key type="filename">icons/icon_square.png</key>
             <key type="filename">icons/icon_custom.png</key>
             <key type="filename">icons/icon_explosion.png</key>
             <key type="filename">icons/icon_ngon.png</key>

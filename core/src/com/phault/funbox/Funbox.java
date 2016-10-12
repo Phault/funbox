@@ -1,9 +1,6 @@
 package com.phault.funbox;
 
-import com.artemis.EntityEdit;
-import com.artemis.World;
-import com.artemis.WorldConfiguration;
-import com.artemis.WorldConfigurationBuilder;
+import com.artemis.*;
 import com.artemis.link.EntityLinkManager;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -25,6 +22,7 @@ import com.phault.funbox.scenegraph.systems.WorldTransformationManager;
 import com.phault.funbox.shaperendering.components.RenderRectangle;
 import com.phault.funbox.shaperendering.systems.ShapeRenderSystem;
 import com.phault.funbox.systems.*;
+import com.phault.funbox.systems.shapes.*;
 
 public class Funbox extends ApplicationAdapter {
 
@@ -52,6 +50,16 @@ public class Funbox extends ApplicationAdapter {
 
         box2DDebugRenderSystem = new Box2DDebugRenderSystem();
 
+
+        SimpleShapeSpawner[] primitiveSpawners = new SimpleShapeSpawner[] {
+                new SquareSpawner(),
+                new CircleSpawner(),
+                new TriangleSpawner(),
+                new NGonSpawner()
+        };
+        RandomSpawner randomSpawner = new RandomSpawner();
+        randomSpawner.addSpawners(primitiveSpawners);
+
         WorldConfigurationBuilder builder = new WorldConfigurationBuilder()
                 .with(new EntityLinkManager())
                 .with(inputSystem)
@@ -59,10 +67,14 @@ public class Funbox extends ApplicationAdapter {
                 .with(new HierarchyManager())
                 .with(worldTransformationManager)
                 .with(collisionSystem)
-                .with(new ExplosionSystem())
                 .with(new ShapeDragSystem())
                 .with(shapeSpawnSystem)
-                .with(new TestMovementSystem())
+
+                .with(randomSpawner)
+                .with((BaseSystem[]) primitiveSpawners)
+                .with(new CustomSpawner())
+                .with(new ExplosionSpawner())
+
                 .with(new CameraSystem())
                 .with(new ZoomSystem())
                 .with(new ShapeRenderSystem())
@@ -102,6 +114,8 @@ public class Funbox extends ApplicationAdapter {
                 return true;
             }
         });
+
+        uiStage.initialize();
     }
 
     private int createGround() {

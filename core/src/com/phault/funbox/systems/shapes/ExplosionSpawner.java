@@ -1,27 +1,36 @@
-package com.phault.funbox.systems;
+package com.phault.funbox.systems.shapes;
 
-import com.artemis.BaseSystem;
+import com.artemis.annotations.Wire;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.ObjectSet;
-import com.phault.funbox.box2d.systems.CollisionSystem;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.phault.funbox.box2d.utils.RaycastClosestCallback;
 
 /**
- * Created by Casper on 27-09-2016.
+ * Created by Casper on 12-10-2016.
  */
-public class ExplosionSystem extends BaseSystem {
-    private CollisionSystem collisionSystem;
+@Wire(injectInherited = true)
+public class ExplosionSpawner extends SimpleShapeSpawner {
+    public float radius = 300;
+    public float power = 400;
+    public int rays = 60;
 
     private final RaycastClosestCallback callback = new RaycastClosestCallback();
 
     @Override
-    protected void processSystem() {
+    public String iconPath() {
+        return "icon_explosion";
     }
 
+    @Override
+    public int spawn(float x, float y) {
+        spawn(x, y,
+                radius * shapeSpawnSystem.getScaleModifier(),
+                power * shapeSpawnSystem.getScaleModifier(),
+                rays);
+        return -1;
+    }
 
-    public void spawnExplosion(float x, float y, float radius, float power, int rayCount) {
+    public void spawn(float x, float y, float radius, float power, int rayCount) {
         x *= collisionSystem.getMetersPerPixel();
         y *= collisionSystem.getMetersPerPixel();
         radius *= collisionSystem.getMetersPerPixel();

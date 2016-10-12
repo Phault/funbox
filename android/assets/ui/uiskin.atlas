@@ -31,7 +31,7 @@ icon_circle
   orig: 41, 41
   offset: 0, 0
   index: -1
-icon_cube
+icon_square
   rotate: false
   xy: 72, 0
   size: 36, 36

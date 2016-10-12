@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.phault.funbox.systems.ShapeSpawnSystem;
+import com.phault.funbox.systems.shapes.ShapeSpawner;
 
 /**
  * Created by Casper on 21-09-2016.
@@ -18,7 +18,7 @@ public class UIStage extends Stage {
     private Table table;
     private Funbox context;
 
-    private final ObjectMap<ShapeSpawnSystem.ShapeType, Drawable> shapeIcons = new ObjectMap<>();
+    private final ObjectMap<String, Drawable> shapeIcons = new ObjectMap<>();
 
     private Drawable pauseIcon, playIcon;
 
@@ -40,7 +40,9 @@ public class UIStage extends Stage {
         setViewport(viewport);
 
         this.context = context;
+    }
 
+    public void initialize() {
         loadTextures();
 
         table = new Table();
@@ -52,19 +54,20 @@ public class UIStage extends Stage {
         VerticalGroup group = new VerticalGroup();
         group.fill();
         group.space(10);
-        for (final ShapeSpawnSystem.ShapeType type : ShapeSpawnSystem.ShapeType.values()) {
+        for (final ShapeSpawner spawner : context.getShapeSpawnSystem().getSpawners()) {
             ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle(skin.get(ImageButton.ImageButtonStyle.class));
-            style.imageUp = shapeIcons.get(type);
+            style.imageUp = shapeIcons.get(spawner.iconPath());
             ImageButton shapeButton = new ImageButton(style);
             shapeButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    context.getShapeSpawnSystem().setActiveType(type);
+                    context.getShapeSpawnSystem().setCurrentSpawner(spawner);
                 }
             });
             buttonGroup.add(shapeButton);
             group.addActor(shapeButton);
         }
+
         table.pad(10);
         table.add(group).expand().top().left();
 
@@ -84,10 +87,10 @@ public class UIStage extends Stage {
     }
 
     private void loadTextures() {
-        for (ShapeSpawnSystem.ShapeType type : ShapeSpawnSystem.ShapeType.values()) {
-            String textureName = "icon_" + type.toString().toLowerCase();
+        for (ShapeSpawner spawner : context.getShapeSpawnSystem().getSpawners()) {
+            String textureName = spawner.iconPath();
             Drawable drawable = skin.getDrawable(textureName);
-            shapeIcons.put(type, drawable);
+            shapeIcons.put(spawner.iconPath(), drawable);
         }
 
         pauseIcon = skin.getDrawable("icon_pause");

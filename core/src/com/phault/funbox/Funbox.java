@@ -121,7 +121,8 @@ public class Funbox extends ApplicationAdapter {
         float halfWidth = 0.5f * width * collisionSystem.getMetersPerPixel();
 
         EdgeShape groundShape = new EdgeShape();
-        groundShape.set(-halfWidth, 0, halfWidth, 0);
+        float skinRadius = groundShape.getRadius();
+        groundShape.set(-halfWidth, -skinRadius, halfWidth, -skinRadius);
         collisionSystem.createFixture(ground, groundShape, 1);
 
         return ground;

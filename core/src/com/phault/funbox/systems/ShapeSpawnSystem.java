@@ -17,6 +17,7 @@ import com.phault.funbox.shaperendering.components.RenderPolygon;
 import com.phault.funbox.shaperendering.components.RenderRectangle;
 import com.phault.funbox.shaperendering.components.RenderTriangle;
 import com.phault.funbox.shaperendering.utils.VertexArray;
+import com.phault.funbox.utils.MathHelper;
 
 import java.util.Random;
 
@@ -133,7 +134,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     }
 
     public int spawnRandomTriangle(float x, float y) {
-        Vector2[] triangle = generateTriangle(minSize.x * getScaleModifier(), maxSize.x * getScaleModifier());
+        float[] triangle = generateTriangle(minSize.x * getScaleModifier(), maxSize.x * getScaleModifier());
         return spawnTriangle(x, y, triangle, getRandomColor());
     }
 
@@ -143,8 +144,9 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         edit.create(Transform.class);
 
         Body boxBody = collisionSystem.createBody(cube, bodyDef);
-        polygonShape.setAsBox(width * 0.5f * collisionSystem.getMetersPerPixel(),
-                height * 0.5f * collisionSystem.getMetersPerPixel());
+        float skinWidth = polygonShape.getRadius();
+        polygonShape.setAsBox(width * 0.5f * collisionSystem.getMetersPerPixel() - skinWidth*0.5f,
+                height * 0.5f * collisionSystem.getMetersPerPixel() - skinWidth*0.5f);
         fixtureDef.shape = polygonShape;
         boxBody.createFixture(fixtureDef);
 
@@ -177,40 +179,53 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         return circle;
     }
 
-    private final Vector2[] genTriangle = new Vector2[] { new Vector2(), new Vector2(), new Vector2()};
-
-    private Vector2[] generateTriangle(float minEdgeLength, float maxEdgeLength) {
+    private float[] generateTriangle(float minEdgeLength, float maxEdgeLength) {
         float firstAngle = 360f * random.nextFloat();
         float secondAngle = firstAngle + MathUtils.lerp(minTriangleAngle, maxTriangleAngle, random.nextFloat());
 
         float firstLength = MathUtils.lerp(minEdgeLength, maxEdgeLength, random.nextFloat());
         float secondLength = MathUtils.lerp(minEdgeLength, maxEdgeLength, random.nextFloat());
 
-        genTriangle[0].set(0, 0);
-        genTriangle[1].set(MathUtils.cosDeg(firstAngle), MathUtils.sinDeg(firstAngle)).scl(firstLength);
-        genTriangle[2].set(MathUtils.cosDeg(secondAngle), MathUtils.sinDeg(secondAngle)).scl(secondLength);
+        tmpTriangle[0] = 0;
+        tmpTriangle[1] = 0;
 
-        centerPolygon(genTriangle);
+        tmpTriangle[2] = MathUtils.cosDeg(firstAngle) * firstLength;
+        tmpTriangle[3] = MathUtils.sinDeg(firstAngle) * firstLength;
 
-        return genTriangle;
+        tmpTriangle[4] = MathUtils.cosDeg(secondAngle) * secondLength;
+        tmpTriangle[5] = MathUtils.sinDeg(secondAngle) * secondLength;
+
+        centerPolygon(tmpTriangle);
+
+        return tmpTriangle;
     }
-    private static void centerPolygon(Vector2[] polygon) {
-        float x = 0;
-        float y = 0;
-        for (int i = 0; i < polygon.length; i++) {
-            Vector2 point = polygon[i];
-            x += point.x;
-            y += point.y;
+
+    private static final Vector2 tmpCenter = new Vector2();
+    private static void centerPolygon(float[] polygon) {
+        getPolygonCenter(polygon, tmpCenter);
+
+        for (int i = 0; i < polygon.length; i += 2) {
+            polygon[i] -= tmpCenter.x;
+            polygon[i+1] -= tmpCenter.y;
+        }
+    }
+
+    private static Vector2 getPolygonCenter(float[] polygon, Vector2 result) {
+        result.setZero();
+        for (int i = 0; i < polygon.length; i += 2) {
+            float x = polygon[i];
+            float y = polygon[i+1];
+            result.x += x;
+            result.y += y;
         }
 
-        x /= polygon.length;
-        y /= polygon.length;
+        result.x /= polygon.length / 2;
+        result.y /= polygon.length / 2;
 
-        for (int i = 0; i < polygon.length; i++)
-            polygon[i].sub(x, y);
+        return result;
     }
 
-    public int spawnTriangle(float x, float y, Vector2[] points, Color color) {
+    public int spawnTriangle(float x, float y, float[] polygon, Color color) {
         int triangle = world.create();
         EntityEdit edit = world.edit(triangle);
         edit.create(Transform.class);
@@ -219,13 +234,16 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         renderTriangle.color.set(color);
 
         for (int i = 0; i < renderTriangle.points.length; i++)
-            renderTriangle.points[i].set(points[i]);
+            renderTriangle.points[i].set(polygon[i*2], polygon[i*2+1]);
 
-        for (int i = 0; i < points.length; i++)
-            points[i].scl(collisionSystem.getMetersPerPixel());
+        for (int i = 0; i < polygon.length; i++)
+            polygon[i] *= collisionSystem.getMetersPerPixel();
+
+        subtractSkinRadius(polygon, polygonShape.getRadius() * 2);
+        centerPolygon(polygon);
 
         Body body = collisionSystem.createBody(triangle, bodyDef);
-        polygonShape.set(points);
+        polygonShape.set(polygon);
         fixtureDef.shape = polygonShape;
         body.createFixture(fixtureDef);
 
@@ -276,6 +294,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private final float[] tmpTriangle = new float[6];
 
     private void createPolygonFixtures(Body body, VertexArray vertices, ShortArray triangulation, FixtureDef fixtureDef) {
+        float skinRadius = polygonShape.getRadius();
         for (int i = 0; i < triangulation.size; i += 3) {
             for (int j = 0; j < 3; j++) {
                 int polygonVertex = triangulation.get(i+j);
@@ -287,6 +306,8 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
                 tmpTriangle[triangleVertex+1] = scaledY;
             }
 
+            subtractSkinRadius(tmpTriangle, skinRadius*2);
+
             GeometryUtils.ensureCCW(tmpTriangle);
 
             if (!CollisionSystem.isTriangleValid(tmpTriangle))
@@ -295,6 +316,16 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
             polygonShape.set(tmpTriangle);
             fixtureDef.shape = polygonShape;
             body.createFixture(fixtureDef);
+        }
+    }
+
+    private static final Vector2 tmpVertex = new Vector2();
+    private static void subtractSkinRadius(float[] polygon, float skinRadius) {
+        for (int i = 0; i < polygon.length; i += 2) {
+            MathHelper.moveTowards(polygon[i], polygon[i + 1], 0, 0, skinRadius, tmpVertex);
+
+            polygon[i] = tmpVertex.x;
+            polygon[i+1] = tmpVertex.y;
         }
     }
 

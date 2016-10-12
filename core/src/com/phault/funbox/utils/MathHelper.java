@@ -20,6 +20,27 @@ public class MathHelper {
         return min + (value - min) % rangeSize;
     }
 
+    public static float moveTowards(float from, float to, float maxDelta) {
+        float delta = to - from;
+        return from + Math.signum(delta) * Math.signum(maxDelta) * Math.min(Math.abs(maxDelta), Math.abs(delta));
+    }
+
+    public static Vector2 directionFromTo(Vector2 from, Vector2 to, Vector2 result) {
+        return directionFromTo(from.x, from.y, to.x, to.y, result);
+    }
+    public static Vector2 directionFromTo(float fromX, float fromY, float toX, float toY, Vector2 result) {
+        return result.set(toX, toY).sub(fromX, fromY).nor();
+    }
+    public static Vector2 moveTowards(Vector2 from, Vector2 to, float maxDelta, Vector2 result) {
+        return moveTowards(from.x, from.y, to.x, to.y, maxDelta, result);
+    }
+    public static Vector2 moveTowards(float fromX, float fromY, float toX, float toY, float maxDelta, Vector2 result) {
+        directionFromTo(fromX, fromY, toX, toY, result);
+        float x = moveTowards(fromX, toX, maxDelta * Math.abs(result.x));
+        float y = moveTowards(fromY, toY, maxDelta * Math.abs(result.y));
+        return result.set(x, y);
+    }
+
     private static final Vector2 lineDelta = new Vector2();
     private static final Vector2 startToPoint = new Vector2();
 

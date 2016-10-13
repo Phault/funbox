@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.Pool;
 import com.phault.funbox.utils.MathHelper;
+import com.phault.funbox.utils.PolygonUtils;
 
 /**
  * Created by Casper on 24-09-2016.
@@ -188,5 +189,9 @@ public class ShapeDrawing implements Pool.Poolable {
 
     public void setMinimumPointDistance(float minimumPointDistance) {
         this.minimumPointDistance = minimumPointDistance;
+    }
+
+    public void center() {
+        PolygonUtils.centerPolygon(points);
     }
 }

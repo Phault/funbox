@@ -18,7 +18,7 @@ public class CustomSpawner extends ShapeSpawner {
     public float baseMinIntermediatePointDistance = 2;
 
     private ShapeDrawingSystem drawingSystem;
-    private IntMap<ShapeDrawing> activeDrawings = new IntMap<>();
+    private final IntMap<ShapeDrawing> activeDrawings = new IntMap<>();
 
     @Override
     public String iconPath() {
@@ -34,7 +34,7 @@ public class CustomSpawner extends ShapeSpawner {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector2 worldPos = screenToWorld(screenX, screenY);
 
-        if (drawingSystem != null && !activeDrawings.containsKey(pointer)) {
+        if (!activeDrawings.containsKey(pointer)) {
             ShapeDrawing shapeDrawing = drawingSystem.createDrawing(getRandomColor(),
                     minimumDrawingPointDistance * shapeSpawnSystem.getScaleModifier());
             shapeDrawing.addPoint(worldPos.x, worldPos.y);
@@ -67,14 +67,23 @@ public class CustomSpawner extends ShapeSpawner {
         if (shapeDrawing != null) {
             activeDrawings.remove(pointer);
 
+            float firstX = shapeDrawing.getPointX(0);
+            float firstY = shapeDrawing.getPointY(0);
+
+            shapeDrawing.center();
+
+            float deltaFirstX = firstX - shapeDrawing.getPointX(0);
+            float deltaFirstY = firstY - shapeDrawing.getPointY(0);
+
             shapeDrawing.optimize(baseMinIntermediatePointDistance * shapeSpawnSystem.getScaleModifier());
+
             if (shapeDrawing.isValid()) {
                 VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
                 for (int i = 0; i < vertices.size(); i++)
                     vertices.set(i, shapeDrawing.getPointX(i), shapeDrawing.getPointY(i));
                 GeometryUtils.ensureCCW(vertices.getBackingArray());
 
-                shapeSpawnSystem.spawnPolygon(0, 0, vertices, shapeDrawing.getColor());
+                shapeSpawnSystem.spawnPolygon(deltaFirstX, deltaFirstY, vertices, shapeDrawing.getColor());
             }
 
             drawingSystem.destroyDrawing(shapeDrawing);

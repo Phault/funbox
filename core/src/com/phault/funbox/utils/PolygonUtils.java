@@ -1,6 +1,7 @@
 package com.phault.funbox.utils;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.FloatArray;
 
 /**
  * Created by Casper on 12-10-2016.
@@ -17,17 +18,37 @@ public class PolygonUtils {
         }
     }
 
+    public static void centerPolygon(FloatArray polygon) {
+        getPolygonCenter(polygon, tmpCenter);
+
+        for (int i = 0; i < polygon.size; i += 2) {
+            polygon.set(i, polygon.get(i) - tmpCenter.x);
+            polygon.set(i + 1, polygon.get(i + 1) - tmpCenter.y);
+        }
+    }
+
     public static Vector2 getPolygonCenter(float[] polygon, Vector2 result) {
         result.setZero();
         for (int i = 0; i < polygon.length; i += 2) {
-            float x = polygon[i];
-            float y = polygon[i+1];
-            result.x += x;
-            result.y += y;
+            result.x += polygon[i];
+            result.y += polygon[i+1];
         }
 
         result.x /= polygon.length / 2;
         result.y /= polygon.length / 2;
+
+        return result;
+    }
+
+    public static Vector2 getPolygonCenter(FloatArray polygon, Vector2 result) {
+        result.setZero();
+        for (int i = 0; i < polygon.size; i += 2) {
+            result.x += polygon.get(i);
+            result.y += polygon.get(i+1);
+        }
+
+        result.x /= polygon.size / 2;
+        result.y /= polygon.size / 2;
 
         return result;
     }

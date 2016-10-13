@@ -18,6 +18,7 @@ import com.phault.funbox.shaperendering.components.RenderPolygon;
 import com.phault.funbox.shaperendering.utils.VertexArray;
 import com.phault.funbox.systems.shapes.ShapeSpawner;
 import com.phault.funbox.utils.MathHelper;
+import com.phault.funbox.utils.PolygonUtils;
 
 /**
  * Created by Casper on 06-09-2016.
@@ -99,7 +100,7 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
                 tmpTriangle[triangleVertex+1] = scaledY;
             }
 
-            subtractSkinRadius(tmpTriangle, skinRadius*2);
+            subtractSkinRadius(tmpTriangle, skinRadius);
 
             GeometryUtils.ensureCCW(tmpTriangle);
 
@@ -111,10 +112,14 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
         }
     }
 
+    private static final Vector2 tmpCenter = new Vector2();
     private static final Vector2 tmpVertex = new Vector2();
     public static void subtractSkinRadius(float[] polygon, float skinRadius) {
+
+        PolygonUtils.getPolygonCenter(polygon, tmpCenter);
+
         for (int i = 0; i < polygon.length; i += 2) {
-            MathHelper.moveTowards(polygon[i], polygon[i + 1], 0, 0, skinRadius, tmpVertex);
+            MathHelper.moveTowards(polygon[i], polygon[i + 1], tmpCenter.x, tmpCenter.y, skinRadius, tmpVertex);
 
             polygon[i] = tmpVertex.x;
             polygon[i+1] = tmpVertex.y;

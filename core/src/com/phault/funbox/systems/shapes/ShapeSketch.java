@@ -1,5 +1,7 @@
 package com.phault.funbox.systems.shapes;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
 
 public class ShapeSketch implements Pool.Poolable {
@@ -7,6 +9,8 @@ public class ShapeSketch implements Pool.Poolable {
             top = Float.NaN,
             right = Float.NaN,
             bottom = Float.NaN;
+
+    public final Color color = Color.WHITE.cpy();
 
     public void setTopLeft(float x, float y) {
         left = x;
@@ -16,6 +20,18 @@ public class ShapeSketch implements Pool.Poolable {
     public void setBottomRight(float x, float y) {
         right = x;
         bottom = y;
+    }
+
+    public float width() {
+        return Math.abs(right - left);
+    }
+
+    public float height() {
+        return Math.abs(bottom - top);
+    }
+
+    public float dst() {
+        return Vector2.dst(left, top, right, bottom);
     }
 
     public boolean isValid() {
@@ -34,5 +50,7 @@ public class ShapeSketch implements Pool.Poolable {
         top = Float.NaN;
         right = Float.NaN;
         bottom = Float.NaN;
+
+        color.set(Color.WHITE);
     }
 }

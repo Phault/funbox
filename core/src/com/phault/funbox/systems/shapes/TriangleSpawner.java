@@ -38,7 +38,7 @@ public class TriangleSpawner extends SimpleShapeSpawner {
 
     @Override
     protected void draw(int pointer, ShapeSketch sketch) {
-        float[] triangle = triangleFromBounds(sketch.left, sketch.top, sketch.right, sketch.bottom);
+        float[] triangle = triangleFromSketch(sketch);
         shapeRenderSystem.drawTriangle(triangle);
     }
 
@@ -52,11 +52,11 @@ public class TriangleSpawner extends SimpleShapeSpawner {
     private final Vector2 tmpCenter = new Vector2();
 
     @Override
-    public int spawn(float left, float top, float right, float bottom) {
-        float[] triangle = triangleFromBounds(left, top, right, bottom);
+    public int spawn(ShapeSketch sketch) {
+        float[] triangle = triangleFromSketch(sketch);
         Vector2 center = PolygonUtils.getPolygonCenter(triangle, tmpCenter);
         PolygonUtils.offsetPolygon(triangle, -center.x, -center.y);
-        return spawn(center.x, center.y, triangle, getRandomColor());
+        return spawn(center.x, center.y, triangle, sketch.color);
     }
 
     public int spawn(float x, float y, float[] polygon, Color color) {
@@ -108,15 +108,15 @@ public class TriangleSpawner extends SimpleShapeSpawner {
         return tmpTriangle;
     }
 
-    private float[] triangleFromBounds(float left, float top, float right, float bottom) {
-        tmpTriangle[0] = left;
-        tmpTriangle[1] = top;
+    private float[] triangleFromSketch(ShapeSketch sketch) {
+        tmpTriangle[0] = sketch.left;
+        tmpTriangle[1] = sketch.top;
 
-        tmpTriangle[2] = left;
-        tmpTriangle[3] = bottom;
+        tmpTriangle[2] = sketch.left;
+        tmpTriangle[3] = sketch.bottom;
 
-        tmpTriangle[4] = right;
-        tmpTriangle[5] = bottom;
+        tmpTriangle[4] = sketch.right;
+        tmpTriangle[5] = sketch.bottom;
 
         return tmpTriangle;
     }

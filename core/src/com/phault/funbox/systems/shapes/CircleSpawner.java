@@ -40,9 +40,7 @@ public class CircleSpawner extends SimpleShapeSpawner {
 
     @Override
     protected boolean isSketchValid(ShapeSketch sketch) {
-        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
-
-        return sketch.isValid() && radius > 5;
+        return sketch.isValid() && sketch.dst() > 5;
     }
 
     @Override
@@ -52,9 +50,9 @@ public class CircleSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float left, float top, float right, float bottom) {
-        float radius = Vector2.dst(left, top, right, bottom);
-        return spawn(left, top, radius, getRandomColor());
+    public int spawn(ShapeSketch sketch) {
+        float radius = sketch.dst();
+        return spawn(sketch.left, sketch.top, radius, sketch.color);
     }
 
     public int spawn(float x, float y, float radius, Color color) {

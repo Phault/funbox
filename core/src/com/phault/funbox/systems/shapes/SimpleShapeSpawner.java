@@ -1,14 +1,10 @@
 package com.phault.funbox.systems.shapes;
 
-import com.artemis.annotations.Wire;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import com.phault.funbox.shaperendering.systems.ShapeRenderSystem;
-import com.phault.funbox.systems.ShapeDragSystem;
 
 /**
  * Created by Casper on 12-10-2016.
@@ -29,8 +25,10 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
     @Override
     protected void processSystem() {
         shapeRenderSystem.setShapeType(ShapeRenderer.ShapeType.Filled);
-        for (IntMap.Entry<ShapeSketch> entry: sketches.entries())
+        for (IntMap.Entry<ShapeSketch> entry: sketches.entries()) {
+            shapeRenderSystem.setColor(entry.value.color);
             draw(entry.key, entry.value);
+        }
     }
 
     @Override
@@ -41,6 +39,7 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
         Vector2 worldPos = screenToWorld(screenX, screenY);
 
         ShapeSketch sketch = sketchPool.obtain();
+        sketch.color.set(getRandomColor());
         sketch.left = worldPos.x;
         sketch.top = worldPos.y;
         sketches.put(pointer, sketch);
@@ -76,7 +75,7 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
             if (!isSketchValid(sketch))
                 spawn(worldPos.x, worldPos.y);
             else
-                spawn(sketch.left, sketch.top, sketch.right, sketch.bottom);
+                spawn(sketch);
 
             sketches.remove(pointer);
             sketchPool.free(sketch);
@@ -95,5 +94,5 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
 
     protected abstract void draw(int pointer, ShapeSketch sketch);
     public abstract int spawn(float x, float y);
-    public abstract int spawn(float left, float top, float right, float bottom);
+    public abstract int spawn(ShapeSketch sketch);
 }

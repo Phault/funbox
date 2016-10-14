@@ -30,7 +30,7 @@ public class NGonSpawner extends SimpleShapeSpawner {
 
     @Override
     protected void draw(int pointer, ShapeSketch sketch) {
-        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
+        float radius = sketch.dst();
         generateNGon(defaultNGon, radius);
         PolygonUtils.offsetPolygon(defaultNGon, sketch.left, sketch.top);
         ShortArray triangulation = triangulator.computeTriangles(defaultNGon);
@@ -52,9 +52,9 @@ public class NGonSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float left, float top, float right, float bottom) {
-        float radius = Vector2.dst(left, top, right, bottom);
-        return spawn(left, top, defaultSides, radius, getRandomColor());
+    public int spawn(ShapeSketch sketch) {
+        float radius = sketch.dst();
+        return spawn(sketch.left, sketch.top, defaultSides, radius, sketch.color);
     }
 
     public int spawn(float x, float y, int sides, float radius, Color color) {

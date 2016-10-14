@@ -34,13 +34,10 @@ public class SquareSpawner extends SimpleShapeSpawner {
 
     @Override
     protected void draw(int pointer, ShapeSketch sketch) {
-        float width = Math.abs(sketch.right - sketch.left);
-        float height = Math.abs(sketch.bottom - sketch.top);
-
         float x = Math.min(sketch.left, sketch.right);
         float y = Math.min(sketch.top, sketch.bottom);
 
-        shapeRenderSystem.drawRect(x, y, width, height);
+        shapeRenderSystem.drawRect(x, y, sketch.width(), sketch.height());
     }
 
     @Override
@@ -52,15 +49,12 @@ public class SquareSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float left, float top, float right, float bottom) {
+    public int spawn(ShapeSketch sketch) {
 
-        float width = Math.abs(right - left);
-        float height = Math.abs(bottom - top);
+        float x = MathUtils.lerp(sketch.left, sketch.right, 0.5f);
+        float y = MathUtils.lerp(sketch.top, sketch.bottom, 0.5f);
 
-        float x = MathUtils.lerp(left, right, 0.5f);
-        float y = MathUtils.lerp(top, bottom, 0.5f);
-
-        return spawn(x, y, width, height, getRandomColor());
+        return spawn(x, y, sketch.width(), sketch.height(), sketch.color);
     }
 
     public int spawn(float x, float y, float width, float height, Color color) {

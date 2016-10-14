@@ -63,10 +63,10 @@ public class RandomSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float left, float top, float right, float bottom) {
+    public int spawn(ShapeSketch sketch) {
 
         if (currentSpawner != null)
-            return currentSpawner.spawn(left, top, right, bottom);
+            return currentSpawner.spawn(sketch);
 
         return -1;
     }

@@ -2,7 +2,6 @@ package com.phault.funbox.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
-import com.artemis.annotations.Wire;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.EarClippingTriangulator;

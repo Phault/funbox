@@ -4,6 +4,7 @@ import com.artemis.EntityEdit;
 import com.artemis.annotations.Wire;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.phault.funbox.scenegraph.components.Transform;
@@ -32,9 +33,28 @@ public class CircleSpawner extends SimpleShapeSpawner {
     }
 
     @Override
+    protected void draw(int pointer, ShapeSketch sketch) {
+        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
+        shapeRenderSystem.drawCircle(sketch.left, sketch.top, radius);
+    }
+
+    @Override
+    protected boolean isSketchValid(ShapeSketch sketch) {
+        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
+
+        return sketch.isValid() && radius > 5;
+    }
+
+    @Override
     public int spawn(float x, float y) {
         float radius = MathUtils.random(minRadius, maxRadius) * shapeSpawnSystem.getScaleModifier();
         return spawn(x, y, radius, getRandomColor());
+    }
+
+    @Override
+    public int spawn(float left, float top, float right, float bottom) {
+        float radius = Vector2.dst(left, top, right, bottom);
+        return spawn(left, top, radius, getRandomColor());
     }
 
     public int spawn(float x, float y, float radius, Color color) {

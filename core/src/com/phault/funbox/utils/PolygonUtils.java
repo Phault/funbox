@@ -11,19 +11,25 @@ public class PolygonUtils {
     private static final Vector2 tmpCenter = new Vector2();
     public static void centerPolygon(float[] polygon) {
         getPolygonCenter(polygon, tmpCenter);
-
-        for (int i = 0; i < polygon.length; i += 2) {
-            polygon[i] -= tmpCenter.x;
-            polygon[i+1] -= tmpCenter.y;
-        }
+        offsetPolygon(polygon, -tmpCenter.x, -tmpCenter.y);
     }
 
     public static void centerPolygon(FloatArray polygon) {
         getPolygonCenter(polygon, tmpCenter);
+        offsetPolygon(polygon, -tmpCenter.x, -tmpCenter.y);
+    }
 
+    public static void offsetPolygon(float[] polygon, float x, float y) {
+        for (int i = 0; i < polygon.length; i += 2) {
+            polygon[i] += x;
+            polygon[i+1] += y;
+        }
+    }
+
+    public static void offsetPolygon(FloatArray polygon, float x, float y) {
         for (int i = 0; i < polygon.size; i += 2) {
-            polygon.set(i, polygon.get(i) - tmpCenter.x);
-            polygon.set(i + 1, polygon.get(i + 1) - tmpCenter.y);
+            polygon.set(i, polygon.get(i) + x);
+            polygon.set(i + 1, polygon.get(i + 1) + y);
         }
     }
 

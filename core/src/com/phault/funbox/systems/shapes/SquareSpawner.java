@@ -33,9 +33,32 @@ public class SquareSpawner extends SimpleShapeSpawner {
     }
 
     @Override
+    protected void draw(int pointer, ShapeSketch sketch) {
+        float width = Math.abs(sketch.right - sketch.left);
+        float height = Math.abs(sketch.bottom - sketch.top);
+
+        float x = Math.min(sketch.left, sketch.right);
+        float y = Math.min(sketch.top, sketch.bottom);
+
+        shapeRenderSystem.drawRect(x, y, width, height);
+    }
+
+    @Override
     public int spawn(float x, float y) {
         float width = MathUtils.random(minSize.x, maxSize.x) * shapeSpawnSystem.getScaleModifier();
         float height = MathUtils.random(minSize.y, maxSize.y) * shapeSpawnSystem.getScaleModifier();
+
+        return spawn(x, y, width, height, getRandomColor());
+    }
+
+    @Override
+    public int spawn(float left, float top, float right, float bottom) {
+
+        float width = Math.abs(right - left);
+        float height = Math.abs(bottom - top);
+
+        float x = MathUtils.lerp(left, right, 0.5f);
+        float y = MathUtils.lerp(top, bottom, 0.5f);
 
         return spawn(x, y, width, height, getRandomColor());
     }

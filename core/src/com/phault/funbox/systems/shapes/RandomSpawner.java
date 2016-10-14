@@ -3,6 +3,7 @@ package com.phault.funbox.systems.shapes;
 import com.artemis.annotations.Wire;
 import com.artemis.utils.Bag;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.IntMap;
 
 /**
  * Created by Casper on 12-10-2016.
@@ -11,6 +12,9 @@ import com.badlogic.gdx.math.MathUtils;
 public class RandomSpawner extends SimpleShapeSpawner {
 
     private final Bag<SimpleShapeSpawner> spawners = new Bag<>();
+    private final IntMap<SimpleShapeSpawner> pendingSpawns = new IntMap<>();
+
+    private SimpleShapeSpawner currentSpawner;
 
     @Override
     public String iconPath() {
@@ -18,14 +22,64 @@ public class RandomSpawner extends SimpleShapeSpawner {
     }
 
     @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (!pendingSpawns.containsKey(pointer))
+            pendingSpawns.put(pointer, getRandomSpawner());
+
+        return super.touchDown(screenX, screenY, pointer, button);
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        currentSpawner = pendingSpawns.remove(pointer);
+
+        return super.touchUp(screenX, screenY, pointer, button);
+    }
+
+    @Override
+    protected void draw(int pointer, ShapeSketch sketch) {
+        SimpleShapeSpawner spawner = pendingSpawns.get(pointer);
+
+        if (spawner != null)
+            spawner.draw(pointer, sketch);
+    }
+
+    @Override
+    protected boolean isSketchValid(ShapeSketch sketch) {
+
+        if (currentSpawner != null)
+            return currentSpawner.isSketchValid(sketch);
+
+        return super.isSketchValid(sketch);
+    }
+
+    @Override
     public int spawn(float x, float y) {
 
-        if (spawners.size() > 0) {
-            int index = MathUtils.random(0, spawners.size() - 1);
-            return spawners.get(index).spawn(x, y);
-        }
+        SimpleShapeSpawner spawner = getRandomSpawner();
+
+        if (spawner != null)
+            return spawner.spawn(x, y);
 
         return -1;
+    }
+
+    @Override
+    public int spawn(float left, float top, float right, float bottom) {
+
+        if (currentSpawner!= null)
+            return currentSpawner.spawn(left, top, right, bottom);
+
+        return -1;
+    }
+
+    private SimpleShapeSpawner getRandomSpawner() {
+        if (spawners.size() > 0) {
+            int index = MathUtils.random(0, spawners.size() - 1);
+            return spawners.get(index);
+        }
+
+        return null;
     }
 
     public void addSpawner(SimpleShapeSpawner spawner) {

@@ -23,6 +23,8 @@
 	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.box2d"/>
 	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.shaperendering"/>
 
+    <extend-configuration-property name="gdx.reflect.include" value="com.phault.funbox.shaperendering.commands" />
+
 	<inherits name='Funbox' />
 	<entry-point class='com.phault.funbox.client.HtmlLauncher' />
 	

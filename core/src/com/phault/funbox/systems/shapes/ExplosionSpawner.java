@@ -1,7 +1,9 @@
 package com.phault.funbox.systems.shapes;
 
 import com.artemis.annotations.Wire;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.phault.funbox.box2d.utils.RaycastClosestCallback;
 
@@ -22,12 +24,37 @@ public class ExplosionSpawner extends SimpleShapeSpawner {
     }
 
     @Override
+    protected void draw(int pointer, ShapeSketch sketch) {
+        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
+
+        shapeRenderSystem.setShapeType(ShapeRenderer.ShapeType.Line);
+        shapeRenderSystem.drawCircle(sketch.left, sketch.top, radius);
+    }
+
+    @Override
+    protected boolean isSketchValid(ShapeSketch sketch) {
+        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
+
+        return sketch.isValid() && radius > 5;
+    }
+
+    @Override
     public int spawn(float x, float y) {
-        spawn(x, y,
-                radius * shapeSpawnSystem.getScaleModifier(),
-                power * shapeSpawnSystem.getScaleModifier(),
-                rays);
+        spawn(x, y, radius * shapeSpawnSystem.getScaleModifier());
         return -1;
+    }
+
+    @Override
+    public int spawn(float left, float top, float right, float bottom) {
+        float radius = Vector2.dst(left, top, right, bottom);
+        spawn(left, top, radius);
+
+        return -1;
+    }
+
+    public void spawn(float x, float y, float radius) {
+        float scaleModifier = radius / this.radius;
+        spawn(x, y, radius, power * scaleModifier, (int) (rays * scaleModifier));
     }
 
     public void spawn(float x, float y, float radius, float power, int rayCount) {

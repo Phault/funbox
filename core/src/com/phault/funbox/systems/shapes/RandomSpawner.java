@@ -56,10 +56,8 @@ public class RandomSpawner extends SimpleShapeSpawner {
     @Override
     public int spawn(float x, float y) {
 
-        SimpleShapeSpawner spawner = getRandomSpawner();
-
-        if (spawner != null)
-            return spawner.spawn(x, y);
+        if (currentSpawner != null)
+            return currentSpawner.spawn(x, y);
 
         return -1;
     }
@@ -67,7 +65,7 @@ public class RandomSpawner extends SimpleShapeSpawner {
     @Override
     public int spawn(float left, float top, float right, float bottom) {
 
-        if (currentSpawner!= null)
+        if (currentSpawner != null)
             return currentSpawner.spawn(left, top, right, bottom);
 
         return -1;

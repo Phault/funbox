@@ -172,8 +172,12 @@ public class CollisionSystem extends BaseEntitySystem implements ContactListener
         Array<Fixture> fixtures = rigidbody.body.getFixtureList();
         for (int i = 0; i < fixtures.size; i++) {
             Fixture fixture = fixtures.get(i);
-            int fixtureId = (Integer) fixture.getUserData();
-            destroyFixtureLink(fixtureId);
+
+            Object userData = fixture.getUserData();
+            if (userData != null) {
+                int fixtureId = (Integer) userData;
+                destroyFixtureLink(fixtureId);
+            }
         }
 
         physicsWorld.destroyBody(rigidbody.body);

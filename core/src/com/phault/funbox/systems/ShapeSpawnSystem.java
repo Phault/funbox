@@ -2,6 +2,7 @@ package com.phault.funbox.systems;
 
 import com.artemis.BaseSystem;
 import com.artemis.EntityEdit;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.EarClippingTriangulator;
@@ -193,17 +194,40 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        ShapeSpawner spawner = getCurrentSpawner();
-        if (spawner != null)
-            return spawner.touchDown(screenX, screenY, pointer, button);
+
+        if (button == Input.Buttons.LEFT) {
+            ShapeSpawner spawner = getCurrentSpawner();
+            if (spawner != null)
+                return spawner.touchDown(screenX, screenY, pointer, button);
+        }
+
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        ShapeSpawner spawner = getCurrentSpawner();
-        if (spawner != null)
-            return spawner.touchUp(screenX, screenY, pointer, button);
+
+        if (button == Input.Buttons.RIGHT) {
+            cameraSystem.screenToWorld(screenX, screenY, tmpVertex);
+            tmpVertex.scl(collisionSystem.getMetersPerPixel());
+            Body body = collisionSystem.queryPoint(tmpVertex.x, tmpVertex.y);
+
+            if (body != null) {
+                int entityId = collisionSystem.getEntityId(body);
+                collisionSystem.destroyBody(body);
+
+                if (entityId != -1)
+                    world.delete(entityId);
+                return true;
+            }
+        }
+
+        if (button == Input.Buttons.LEFT) {
+            ShapeSpawner spawner = getCurrentSpawner();
+            if (spawner != null)
+                return spawner.touchUp(screenX, screenY, pointer, button);
+        }
+
         return false;
     }
 

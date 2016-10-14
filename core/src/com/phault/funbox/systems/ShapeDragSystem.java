@@ -2,6 +2,7 @@ package com.phault.funbox.systems;
 
 import com.artemis.BaseSystem;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -78,6 +79,9 @@ public class ShapeDragSystem extends BaseSystem implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (button != Input.Buttons.LEFT)
+            return false;
+
         if (isDragging(pointer))
             return true;
 
@@ -120,6 +124,9 @@ public class ShapeDragSystem extends BaseSystem implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (button != Input.Buttons.LEFT)
+            return false;
+
         if (isDragging(pointer)) {
             endDrag(pointer);
             return true;

@@ -2,6 +2,7 @@ package com.phault.funbox.systems.shapes;
 
 import com.artemis.annotations.Wire;
 import com.artemis.utils.Bag;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
 
@@ -54,10 +55,10 @@ public class RandomSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float x, float y) {
+    public int spawn(float x, float y, Color color) {
 
         if (currentSpawner != null)
-            return currentSpawner.spawn(x, y);
+            return currentSpawner.spawn(x, y, color);
 
         return -1;
     }

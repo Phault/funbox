@@ -41,11 +41,11 @@ public class SquareSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float x, float y) {
+    public int spawn(float x, float y, Color color) {
         float width = MathUtils.random(minSize.x, maxSize.x) * shapeSpawnSystem.getScaleModifier();
         float height = MathUtils.random(minSize.y, maxSize.y) * shapeSpawnSystem.getScaleModifier();
 
-        return spawn(x, y, width, height, getRandomColor());
+        return spawn(x, y, width, height, color);
     }
 
     @Override

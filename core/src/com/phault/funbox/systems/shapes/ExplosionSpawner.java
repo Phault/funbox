@@ -1,6 +1,7 @@
 package com.phault.funbox.systems.shapes;
 
 import com.artemis.annotations.Wire;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -36,7 +37,7 @@ public class ExplosionSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float x, float y) {
+    public int spawn(float x, float y, Color color) {
         spawn(x, y, radius * shapeSpawnSystem.getScaleModifier());
         return -1;
     }

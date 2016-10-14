@@ -1,5 +1,6 @@
 package com.phault.funbox.systems.shapes;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
@@ -73,7 +74,7 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
             sketch.bottom = worldPos.y;
 
             if (!isSketchValid(sketch))
-                spawn(worldPos.x, worldPos.y);
+                spawn(worldPos.x, worldPos.y, sketch.color);
             else
                 spawn(sketch);
 
@@ -93,6 +94,6 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
     }
 
     protected abstract void draw(int pointer, ShapeSketch sketch);
-    public abstract int spawn(float x, float y);
+    public abstract int spawn(float x, float y, Color color);
     public abstract int spawn(ShapeSketch sketch);
 }

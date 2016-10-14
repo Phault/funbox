@@ -39,16 +39,14 @@ public class NGonSpawner extends SimpleShapeSpawner {
 
     @Override
     protected boolean isSketchValid(ShapeSketch sketch) {
-        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
-
-        return sketch.isValid() && radius > 5;
+        return sketch.isValid() && sketch.dst() > 5;
     }
 
     @Override
-    public int spawn(float x, float y) {
-        int sides = minSides + MathUtils.random(minSides, maxSides);
+    public int spawn(float x, float y, Color color) {
+        int sides = MathUtils.random(minSides, maxSides);
         float radius = MathUtils.random(minRadius, maxRadius) * shapeSpawnSystem.getScaleModifier();
-        return spawn(x, y, sides, radius, getRandomColor());
+        return spawn(x, y, sides, radius, color);
     }
 
     @Override

@@ -44,9 +44,9 @@ public class CircleSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float x, float y) {
+    public int spawn(float x, float y, Color color) {
         float radius = MathUtils.random(minRadius, maxRadius) * shapeSpawnSystem.getScaleModifier();
-        return spawn(x, y, radius, getRandomColor());
+        return spawn(x, y, radius, color);
     }
 
     @Override

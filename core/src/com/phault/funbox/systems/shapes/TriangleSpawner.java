@@ -43,10 +43,10 @@ public class TriangleSpawner extends SimpleShapeSpawner {
     }
 
     @Override
-    public int spawn(float x, float y) {
+    public int spawn(float x, float y, Color color) {
         float[] triangle = generateTriangle(minSize.x * shapeSpawnSystem.getScaleModifier(),
                 maxSize.x * shapeSpawnSystem.getScaleModifier());
-        return spawn(x, y, triangle, getRandomColor());
+        return spawn(x, y, triangle, color);
     }
 
     private final Vector2 tmpCenter = new Vector2();

@@ -2,8 +2,10 @@ package com.phault.funbox.systems.shapes;
 
 import com.artemis.annotations.Wire;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ShortArray;
 import com.phault.funbox.shaperendering.utils.VertexArray;
 import com.phault.funbox.utils.PolygonUtils;
 
@@ -24,13 +26,15 @@ public class NGonSpawner extends SimpleShapeSpawner {
     }
 
     private final float[] defaultNGon = new float[defaultSides * 2];
+    private final EarClippingTriangulator triangulator = new EarClippingTriangulator();
 
     @Override
     protected void draw(int pointer, ShapeSketch sketch) {
         float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
         generateNGon(defaultNGon, radius);
         PolygonUtils.offsetPolygon(defaultNGon, sketch.left, sketch.top);
-        shapeRenderSystem.drawPath(defaultNGon, 5, true);
+        ShortArray triangulation = triangulator.computeTriangles(defaultNGon);
+        shapeRenderSystem.drawPolygon(defaultNGon, triangulation);
     }
 
     @Override

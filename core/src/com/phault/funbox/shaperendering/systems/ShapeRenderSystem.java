@@ -191,6 +191,10 @@ public class ShapeRenderSystem extends IteratingSystem {
     }
 
     public void drawPolygon(VertexArray polygon, ShortArray triangulation) {
+        drawPolygon(polygon.getBackingArray(), triangulation);
+    }
+
+    public void drawPolygon(float[] polygon, ShortArray triangulation) {
         DrawPolygonCommand command = obtain(DrawPolygonCommand.class);
 
         command.color.set(color);

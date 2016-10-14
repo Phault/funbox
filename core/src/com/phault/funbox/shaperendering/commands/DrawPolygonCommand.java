@@ -7,26 +7,26 @@ import com.phault.funbox.shaperendering.utils.VertexArray;
 
 public class DrawPolygonCommand extends DrawCommand {
 
-    public VertexArray polygon;
+    public float[] polygon;
     public ShortArray triangulation;
-
-    private static final Vector2[] tmpTriangle = new Vector2[] {
-            new Vector2(),
-            new Vector2(),
-            new Vector2(),
-    };
 
     @Override
     public void execute(ShapeRenderer renderer) {
         super.execute(renderer);
 
         for (int i = 0; i < triangulation.size; i += 3) {
-            polygon.get(triangulation.get(i), tmpTriangle[0]);
-            polygon.get(triangulation.get(i + 1), tmpTriangle[1]);
-            polygon.get(triangulation.get(i + 2), tmpTriangle[2]);
-            renderer.triangle(tmpTriangle[0].x, tmpTriangle[0].y,
-                    tmpTriangle[1].x, tmpTriangle[1].y,
-                    tmpTriangle[2].x, tmpTriangle[2].y);
+            int vert1 = triangulation.get(i) * 2;
+            float x1 = polygon[vert1];
+            float y1 = polygon[vert1 + 1];
+
+            int vert2 = triangulation.get(i+1) * 2;
+            float x2 = polygon[vert2];
+            float y2 = polygon[vert2 + 1];
+
+            int vert3 = triangulation.get(i+2) * 2;
+            float x3 = polygon[vert3];
+            float y3 = polygon[vert3 + 1];
+            renderer.triangle(x1, y1, x2, y2, x3, y3);
         }
     }
 

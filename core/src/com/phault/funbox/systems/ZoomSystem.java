@@ -46,9 +46,8 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
 
         // make sure to keep the bottom of the camera at 0 in y
         cameraSystem.screenToWorld(0, Gdx.graphics.getHeight() - 25, tmpPos);
-        tmpPos.x = 0;
-        tmpPos.scl(-1).add(cameraSystem.getPosition().x, cameraSystem.getPosition().y);
-        cameraSystem.setPosition(tmpPos.x, tmpPos.y);
+        cameraSystem.setPosition(0, cameraSystem.getPosition().y - tmpPos.y);
+        cameraSystem.getCamera().update();
     }
 
     @Override

@@ -14,6 +14,10 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
     public float minZoom = 1f, maxZoom = 10;
     public float step = 0.1f;
 
+    public float smoothingSpeed = 3;
+
+    private float target;
+
     private CameraSystem cameraSystem;
     private InputSystem inputSystem;
 
@@ -23,6 +27,7 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
 
         inputSystem.addProcessor(this);
 
+        target = cameraSystem.getZoom();
         scrolled(0);
     }
 
@@ -35,7 +40,15 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
 
     @Override
     protected void processSystem() {
+        float current = cameraSystem.getZoom();
+        cameraSystem.setZoom(MathUtils.lerp(current, target, smoothingSpeed * world.getDelta()));
+        cameraSystem.getCamera().update();
 
+        // make sure to keep the bottom of the camera at 0 in y
+        cameraSystem.screenToWorld(0, Gdx.graphics.getHeight() - 25, tmpPos);
+        tmpPos.x = 0;
+        tmpPos.scl(-1).add(cameraSystem.getPosition().x, cameraSystem.getPosition().y);
+        cameraSystem.setPosition(tmpPos.x, tmpPos.y);
     }
 
     @Override
@@ -77,18 +90,7 @@ public class ZoomSystem extends BaseSystem implements InputProcessor {
     @Override
     public boolean scrolled(int amount) {
 
-        float zoom = cameraSystem.getZoom();
-        zoom += step * amount;
-        zoom = MathUtils.clamp(zoom, minZoom, maxZoom);
-        cameraSystem.setZoom(zoom);
-        cameraSystem.getCamera().update();
-
-        // make sure to keep the bottom of the camera at 0 in y
-        cameraSystem.screenToWorld(0, Gdx.graphics.getHeight() - 25, tmpPos);
-        tmpPos.x = 0;
-        tmpPos.scl(-1).add(cameraSystem.getPosition().x, cameraSystem.getPosition().y);
-        cameraSystem.setPosition(tmpPos.x, tmpPos.y);
-
+        target = MathUtils.clamp(target + step * amount, minZoom, maxZoom);
         return true;
     }
 }

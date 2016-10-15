@@ -186,4 +186,8 @@ public class Funbox extends ApplicationAdapter {
     public CollisionSystem getCollisionSystem() {
         return collisionSystem;
     }
+
+    public World getWorld() {
+        return world;
+    }
 }

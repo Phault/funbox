@@ -88,7 +88,6 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
     private final float[] tmpTriangle = new float[6];
 
     private void createPolygonFixtures(Body body, VertexArray vertices, ShortArray triangulation) {
-        float skinRadius = polygonShape.getRadius();
         for (int i = 0; i < triangulation.size; i += 3) {
             for (int j = 0; j < 3; j++) {
                 int polygonVertex = triangulation.get(i+j);
@@ -99,8 +98,6 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
                 tmpTriangle[triangleVertex] = scaledX;
                 tmpTriangle[triangleVertex+1] = scaledY;
             }
-
-            subtractSkinRadius(tmpTriangle, skinRadius);
 
             GeometryUtils.ensureCCW(tmpTriangle);
 

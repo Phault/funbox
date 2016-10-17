@@ -1,5 +1,6 @@
 package com.phault.funbox.systems.shapes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -91,6 +92,16 @@ public abstract class SimpleShapeSpawner extends ShapeSpawner {
         return sketch.isValid()
                 && Math.abs(sketch.right - sketch.left) > 5
                 && Math.abs(sketch.bottom - sketch.top) > 5;
+    }
+
+    @Override
+    public void endTouches() {
+        super.endTouches();
+
+        for (IntMap.Entry<ShapeSketch> entry: sketches.entries()) {
+            int pointer = entry.key;
+            touchUp(Gdx.input.getX(pointer), Gdx.input.getY(pointer), pointer, 0);
+        }
     }
 
     protected abstract void draw(int pointer, ShapeSketch sketch);

@@ -162,6 +162,10 @@ public class ShapeSpawnSystem extends BaseSystem implements InputProcessor {
 
 
     public void setCurrentSpawner(ShapeSpawner currentSpawner) {
+        if (this.currentSpawner == currentSpawner)
+            return;
+
+        this.currentSpawner.endTouches();
         this.currentSpawner = currentSpawner;
     }
 

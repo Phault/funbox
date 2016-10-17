@@ -4,7 +4,6 @@ import com.artemis.EntityEdit;
 import com.artemis.annotations.Wire;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.phault.funbox.scenegraph.components.Transform;
@@ -34,8 +33,9 @@ public class CircleSpawner extends SimpleShapeSpawner {
 
     @Override
     protected void draw(int pointer, ShapeSketch sketch) {
-        float radius = Vector2.dst(sketch.left, sketch.top, sketch.right, sketch.bottom);
-        shapeRenderSystem.drawCircle(sketch.left, sketch.top, radius);
+
+        float radius = sketch.dst() / 2;
+        shapeRenderSystem.drawCircle(sketch.centerX(), sketch.centerY(), radius);
     }
 
     @Override
@@ -51,8 +51,8 @@ public class CircleSpawner extends SimpleShapeSpawner {
 
     @Override
     public int spawn(ShapeSketch sketch) {
-        float radius = sketch.dst();
-        return spawn(sketch.left, sketch.top, radius, sketch.color);
+        float radius = sketch.dst() / 2;
+        return spawn(sketch.centerX(), sketch.centerY(), radius, sketch.color);
     }
 
     public int spawn(float x, float y, float radius, Color color) {

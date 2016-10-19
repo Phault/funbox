@@ -9,21 +9,10 @@
     <inherits name='com.badlogic.gdx.physics.box2d.box2d-gwt' />
     <inherits name='com.kotcrab.vis.vis-ui' />
     <inherits name='postprocessing' />
-
-    <!-- Why is this needed? -->
-    <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.physics.box2d.Body"/>
-    <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.physics.box2d.Fixture"/>
-    <extend-configuration-property name="artemis.reflect.include" value="com.badlogic.gdx.utils.ShortArray"/>
+    <inherits name='libgdx-artemis-essentials' />
 
     <extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.components"/>
 	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.systems"/>
-
-	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.hierarchy"/>
-	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.scenegraph"/>
-	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.box2d"/>
-	<extend-configuration-property name="artemis.reflect.include" value="com.phault.funbox.shaperendering"/>
-
-    <extend-configuration-property name="gdx.reflect.include" value="com.phault.funbox.shaperendering.commands" />
 
 	<inherits name='Funbox' />
 	<entry-point class='com.phault.funbox.client.HtmlLauncher' />

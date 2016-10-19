@@ -7,8 +7,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.phault.funbox.scenegraph.components.Transform;
-import com.phault.funbox.shaperendering.components.RenderCircle;
+import com.phault.artemis.essentials.scenegraph.components.Transform;
+import com.phault.artemis.essentials.shaperendering.components.RenderCircle;
 
 /**
  * Created by Casper on 12-10-2016.

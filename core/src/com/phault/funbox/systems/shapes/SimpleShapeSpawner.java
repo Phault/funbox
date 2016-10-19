@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
-import com.phault.funbox.shaperendering.systems.ShapeRenderSystem;
+import com.phault.artemis.essentials.shaperendering.systems.ShapeRenderSystem;
 
 /**
  * Created by Casper on 12-10-2016.

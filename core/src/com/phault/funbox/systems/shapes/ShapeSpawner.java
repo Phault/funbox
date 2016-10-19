@@ -5,9 +5,9 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.phault.funbox.box2d.systems.CollisionSystem;
-import com.phault.funbox.scenegraph.systems.WorldTransformationManager;
-import com.phault.funbox.systems.CameraSystem;
+import com.phault.artemis.essentials.box2d.systems.CollisionSystem;
+import com.phault.artemis.essentials.scenegraph.systems.WorldTransformationManager;
+import com.phault.artemis.essentials.systems.CameraSystem;
 import com.phault.funbox.systems.ShapeSpawnSystem;
 
 /**

@@ -4,7 +4,7 @@ import com.artemis.annotations.Wire;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
-import com.phault.funbox.shaperendering.utils.VertexArray;
+import com.phault.artemis.essentials.shaperendering.utils.VertexArray;
 import com.phault.funbox.systems.ShapeDrawing;
 import com.phault.funbox.systems.ShapeDrawingSystem;
 

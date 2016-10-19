@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.phault.funbox.box2d.utils.RaycastClosestCallback;
+import com.phault.artemis.essentials.box2d.utils.RaycastClosestCallback;
 
 /**
  * Created by Casper on 12-10-2016.

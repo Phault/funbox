@@ -7,10 +7,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.phault.funbox.scenegraph.components.Transform;
-import com.phault.funbox.shaperendering.components.RenderTriangle;
+import com.phault.artemis.essentials.scenegraph.components.Transform;
+import com.phault.artemis.essentials.shaperendering.components.RenderTriangle;
+import com.phault.artemis.essentials.utils.PolygonUtils;
 import com.phault.funbox.systems.ShapeSpawnSystem;
-import com.phault.funbox.utils.PolygonUtils;
 
 /**
  * Created by Casper on 12-10-2016.

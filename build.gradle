@@ -118,6 +118,7 @@ project(":core") {
 
     dependencies {
         compile project(":postprocessing")
+        compile project(":libgdx-artemis-essentials")
 
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"

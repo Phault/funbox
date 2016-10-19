@@ -7,8 +7,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.Pool;
-import com.phault.funbox.utils.MathHelper;
-import com.phault.funbox.utils.PolygonUtils;
+import com.phault.artemis.essentials.utils.MathHelper;
+import com.phault.artemis.essentials.utils.PolygonUtils;
 
 /**
  * Created by Casper on 24-09-2016.

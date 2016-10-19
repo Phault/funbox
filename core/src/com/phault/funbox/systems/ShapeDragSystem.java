@@ -10,7 +10,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.IntMap;
-import com.phault.funbox.box2d.systems.CollisionSystem;
+import com.phault.artemis.essentials.box2d.systems.CollisionSystem;
+import com.phault.artemis.essentials.systems.CameraSystem;
+import com.phault.artemis.essentials.systems.InputSystem;
 
 /**
  * Created by Casper on 18-09-2016.

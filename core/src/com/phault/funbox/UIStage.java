@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.phault.funbox.systems.HotkeySystem;
+import com.phault.artemis.essentials.systems.HotkeySystem;
 import com.phault.funbox.systems.shapes.ShapeSpawner;
 
 /**

@@ -4,10 +4,9 @@ import com.artemis.annotations.Wire;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ShortArray;
-import com.phault.funbox.shaperendering.utils.VertexArray;
-import com.phault.funbox.utils.PolygonUtils;
+import com.phault.artemis.essentials.shaperendering.utils.VertexArray;
+import com.phault.artemis.essentials.utils.PolygonUtils;
 
 /**
  * Created by Casper on 12-10-2016.

@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.phault.artemis.essentials.systems.CameraSystem;
+import com.phault.artemis.essentials.systems.InputSystem;
 
 /**
  * Created by Casper on 18-09-2016.

@@ -11,14 +11,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ShortArray;
-import com.phault.funbox.box2d.systems.CollisionSystem;
-import com.phault.funbox.scenegraph.components.Transform;
-import com.phault.funbox.scenegraph.systems.WorldTransformationManager;
-import com.phault.funbox.shaperendering.components.RenderPolygon;
-import com.phault.funbox.shaperendering.utils.VertexArray;
+import com.phault.artemis.essentials.box2d.systems.CollisionSystem;
+import com.phault.artemis.essentials.scenegraph.components.Transform;
+import com.phault.artemis.essentials.scenegraph.systems.WorldTransformationManager;
+import com.phault.artemis.essentials.shaperendering.components.RenderPolygon;
+import com.phault.artemis.essentials.shaperendering.utils.VertexArray;
+import com.phault.artemis.essentials.systems.CameraSystem;
+import com.phault.artemis.essentials.systems.InputSystem;
 import com.phault.funbox.systems.shapes.ShapeSpawner;
-import com.phault.funbox.utils.MathHelper;
-import com.phault.funbox.utils.PolygonUtils;
+import com.phault.artemis.essentials.utils.MathHelper;
+import com.phault.artemis.essentials.utils.PolygonUtils;
 
 /**
  * Created by Casper on 06-09-2016.

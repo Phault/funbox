@@ -1,6 +1,7 @@
 package com.phault.funbox.systems.shapes;
 
 import com.artemis.annotations.Wire;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.GeometryUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
@@ -66,31 +67,45 @@ public class CustomSpawner extends ShapeSpawner {
 
         if (shapeDrawing != null) {
             activeDrawings.remove(pointer);
-
-            float firstX = shapeDrawing.getPointX(0);
-            float firstY = shapeDrawing.getPointY(0);
-
-            shapeDrawing.center();
-
-            float deltaFirstX = firstX - shapeDrawing.getPointX(0);
-            float deltaFirstY = firstY - shapeDrawing.getPointY(0);
-
-            shapeDrawing.optimize(baseMinIntermediatePointDistance * shapeSpawnSystem.getScaleModifier());
-
-            if (shapeDrawing.isValid()) {
-                VertexArray vertices = new VertexArray(shapeDrawing.getPointCount());
-                for (int i = 0; i < vertices.size(); i++)
-                    vertices.set(i, shapeDrawing.getPointX(i), shapeDrawing.getPointY(i));
-                GeometryUtils.ensureCCW(vertices.getBackingArray());
-
-                shapeSpawnSystem.spawnPolygon(deltaFirstX, deltaFirstY, vertices, shapeDrawing.getColor());
-            }
-
+            spawnDrawing(shapeDrawing);
             drawingSystem.destroyDrawing(shapeDrawing);
 
             return true;
         }
 
         return false;
+    }
+
+    private int spawnDrawing(ShapeDrawing drawing) {
+        float firstX = drawing.getPointX(0);
+        float firstY = drawing.getPointY(0);
+
+        drawing.center();
+
+        float deltaFirstX = firstX - drawing.getPointX(0);
+        float deltaFirstY = firstY - drawing.getPointY(0);
+
+        drawing.optimize(baseMinIntermediatePointDistance * shapeSpawnSystem.getScaleModifier());
+
+        if (drawing.isValid()) {
+            VertexArray vertices = new VertexArray(drawing.getPointCount());
+            for (int i = 0; i < vertices.size(); i++)
+                vertices.set(i, drawing.getPointX(i), drawing.getPointY(i));
+            GeometryUtils.ensureCCW(vertices.getBackingArray());
+
+            return shapeSpawnSystem.spawnPolygon(deltaFirstX, deltaFirstY, vertices, drawing.getColor());
+        }
+
+        return -1;
+    }
+
+    @Override
+    public void endTouches() {
+        super.endTouches();
+
+        for (IntMap.Entry<ShapeDrawing> entry : activeDrawings.entries()) {
+            int pointer = entry.key;
+            touchUp(Gdx.input.getX(pointer), Gdx.input.getY(pointer), pointer, 0);
+        }
     }
 }

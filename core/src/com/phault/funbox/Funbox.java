@@ -80,7 +80,7 @@ public class Funbox extends ApplicationAdapter {
                 .with(randomSpawner)
                 .with((BaseSystem[]) primitiveSpawners)
                 .with(new CustomSpawner())
-                .with(new ExplosionSpawner())
+//                .with(new ExplosionSpawner())
 
                 .with(new CameraSystem())
                 .with(new ZoomSystem())
